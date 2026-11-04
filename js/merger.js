@@ -402,6 +402,7 @@
     const skipDupHeaders = el('mergerSkipHeaders')?.checked ?? true;
     const skipTotals = el('mergerSkipTotals')?.checked ?? true;
     const reindexStt = el('mergerReindexStt')?.checked ?? true;
+    const reverseData = el('mergerReverse')?.checked ?? false;
     const addFileName = el('mergerAddFileNameCol')?.checked ?? false;
 
     const processBtn = el('mergerProcessBtn');
@@ -432,6 +433,11 @@
           const startIdx = (isTaxDeclaration && count > 1) ? 1 : 0;
           const pageIndices = [];
           for (let p = startIdx; p < count; p++) pageIndices.push(p);
+
+          // Nếu bật đảo ngược thứ tự dữ liệu
+          if (reverseData) {
+            pageIndices.reverse();
+          }
 
           const copied = await mergedPdf.copyPages(doc, pageIndices);
           copied.forEach(page => mergedPdf.addPage(page));
@@ -479,9 +485,8 @@
             const group = catGroups[key];
             if (!group.sheets.length) continue;
 
-            const mergedGrid = [];
             let masterHeader = null;
-            let sttCounter = 1;
+            const allDataRows = [];
 
             for (const item of group.sheets) {
               const grid = item.grid;
@@ -491,16 +496,10 @@
               const curHeader = grid[headerIdx] || [];
 
               if (!masterHeader) {
-                // Tiêu đề của file đầu tiên
                 masterHeader = [...curHeader];
-                if (addFileName) {
-                  mergedGrid.push(['Tên file nguồn', ...masterHeader]);
-                } else {
-                  mergedGrid.push([...masterHeader]);
-                }
               }
 
-              // Duyệt các dòng dữ liệu sau dòng tiêu đề
+              const fileRows = [];
               for (let r = headerIdx + 1; r < grid.length; r++) {
                 const row = grid[r];
                 if (!row || !row.some(c => c !== '')) continue;
@@ -512,31 +511,48 @@
                 if (skipTotals && isSummaryRow(row)) continue;
 
                 const newRow = [...row];
-                // Chuẩn hóa độ dài dòng theo masterHeader
                 while (newRow.length < masterHeader.length) newRow.push('');
+                fileRows.push(newRow);
+              }
 
-                // Đánh lại số thứ tự (STT) nếu cột 0 là STT
-                if (reindexStt && (/stt/i.test(masterHeader[0] || '') || /^\d+$/.test(newRow[0] || ''))) {
-                  newRow[0] = String(sttCounter++);
-                }
+              // Yêu cầu: Đảo ngược dữ liệu (dòng cuối cùng lên đầu, dòng đầu tiên xuống cuối)
+              if (reverseData) {
+                fileRows.reverse();
+              }
 
+              for (const r of fileRows) {
                 if (addFileName) {
-                  mergedGrid.push([item.fileName, ...newRow]);
+                  allDataRows.push([item.fileName, ...r]);
                 } else {
-                  mergedGrid.push(newRow);
+                  allDataRows.push(r);
                 }
               }
             }
 
-            if (mergedGrid.length > 1) {
+            // Đánh lại số thứ tự (STT 1..N) tuần tự từ trên xuống dưới
+            if (reindexStt && allDataRows.length) {
+              const sttColIdx = addFileName ? 1 : 0;
+              const headerColName = masterHeader ? (masterHeader[0] || '') : '';
+              if (/stt/i.test(headerColName) || allDataRows.some(r => /^\d+$/.test(r[sttColIdx] || ''))) {
+                let sttCounter = 1;
+                for (const r of allDataRows) {
+                  r[sttColIdx] = String(sttCounter++);
+                }
+              }
+            }
+
+            if (masterHeader && allDataRows.length) {
+              const mergedGrid = [
+                addFileName ? ['Tên file nguồn', ...masterHeader] : [...masterHeader],
+                ...allDataRows
+              ];
               resultSheets.push({ name: group.title, grid: mergedGrid });
             }
           }
         } else if (mode === 'append') {
           // GỘP NỐI TIẾP THEO DÒNG (Toàn bộ vào 1 bảng duy nhất)
-          const mergedGrid = [];
           let masterHeader = null;
-          let sttCounter = 1;
+          const allDataRows = [];
 
           for (const f of mergerFiles) {
             for (const s of f.sheets) {
@@ -548,13 +564,9 @@
 
               if (!masterHeader) {
                 masterHeader = [...curHeader];
-                if (addFileName) {
-                  mergedGrid.push(['Tên file nguồn', ...masterHeader]);
-                } else {
-                  mergedGrid.push([...masterHeader]);
-                }
               }
 
+              const fileRows = [];
               for (let r = headerIdx + 1; r < grid.length; r++) {
                 const row = grid[r];
                 if (!row || !row.some(c => c !== '')) continue;
@@ -563,21 +575,40 @@
 
                 const newRow = [...row];
                 while (newRow.length < masterHeader.length) newRow.push('');
+                fileRows.push(newRow);
+              }
 
-                if (reindexStt && (/stt/i.test(masterHeader[0] || '') || /^\d+$/.test(newRow[0] || ''))) {
-                  newRow[0] = String(sttCounter++);
-                }
+              // Yêu cầu: Đảo ngược dữ liệu trong bảng kê
+              if (reverseData) {
+                fileRows.reverse();
+              }
 
+              for (const r of fileRows) {
                 if (addFileName) {
-                  mergedGrid.push([f.name, ...newRow]);
+                  allDataRows.push([f.name, ...r]);
                 } else {
-                  mergedGrid.push(newRow);
+                  allDataRows.push(r);
                 }
               }
             }
           }
 
-          if (mergedGrid.length > 1) {
+          if (reindexStt && allDataRows.length) {
+            const sttColIdx = addFileName ? 1 : 0;
+            const headerColName = masterHeader ? (masterHeader[0] || '') : '';
+            if (/stt/i.test(headerColName) || allDataRows.some(r => /^\d+$/.test(r[sttColIdx] || ''))) {
+              let sttCounter = 1;
+              for (const r of allDataRows) {
+                r[sttColIdx] = String(sttCounter++);
+              }
+            }
+          }
+
+          if (masterHeader && allDataRows.length) {
+            const mergedGrid = [
+              addFileName ? ['Tên file nguồn', ...masterHeader] : [...masterHeader],
+              ...allDataRows
+            ];
             resultSheets.push({ name: 'Dữ liệu gộp (Tổng hợp)', grid: mergedGrid });
           }
         } else if (mode === 'sheets') {
@@ -593,7 +624,21 @@
                 uniqueTitle = `${sheetTitle.slice(0, 28)} (${suffix++})`;
               }
               usedSheetNames.add(uniqueTitle.toLowerCase());
-              resultSheets.push({ name: uniqueTitle, grid: s.grid });
+
+              let grid = s.grid;
+              if (reverseData && grid.length > 1) {
+                const headerIdx = findHeaderRowIndex(grid);
+                const headerRow = grid[headerIdx];
+                const data = grid.slice(headerIdx + 1);
+                data.reverse();
+                if (reindexStt && (/stt/i.test(headerRow[0] || '') || data.some(r => /^\d+$/.test(r[0] || '')))) {
+                  let stt = 1;
+                  for (const r of data) r[0] = String(stt++);
+                }
+                grid = [headerRow, ...data];
+              }
+
+              resultSheets.push({ name: uniqueTitle, grid });
             }
           }
         }
