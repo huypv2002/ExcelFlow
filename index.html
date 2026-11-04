@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ExcelFlow 4.4.4 • Popup Search CRUD</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="ef-app">
+<header class="ef-header"><div class="ef-brand"><span class="ef-logo"><b>X</b></span><button id="navImport" class="ef-brand-link nav active" type="button" title="Trở về màn hình nhập liệu">ExcelFlow</button><span class="ef-brand-sep"></span><span class="ef-tagline">Nhập liệu &amp; đối chiếu Excel</span></div>
+<div class="ef-header-actions"><button type="button" class="ef-outline" id="efSaveTemplate">▱ &nbsp; Lưu mẫu</button>
+<button type="button" class="ef-outline" id="navHistory"><span class="ef-clock">◷</span> Lịch sử</button>
+<button class="btn teal primary-action" disabled="" id="exportBtn">⇩ Xuất file Excel mới</button></div></header>
+<div class="ef-shell">
+<section id="importPage" class="section active">
+<div class="ef-steps" aria-label="Quy trình nhập liệu">
+  <button type="button" data-go-step="1" class="ef-step" id="efStep1"><span class="step-dot" id="stepDot1">1</span><span>Nguồn</span></button>
+  <span class="step-line"></span>
+  <button type="button" data-go-step="2" class="ef-step" id="efStep2"><span class="step-dot" id="stepDot2">2</span><span>File đích</span></button>
+  <span class="step-line"></span>
+  <button type="button" data-go-step="3" class="ef-step current" id="efStep3"><span class="step-dot" id="stepDot3">3</span><span>Ghép cột</span></button>
+  <span class="step-line"></span>
+  <button type="button" data-go-step="4" class="ef-step" id="efStep4"><span class="step-dot" id="stepDot4">4</span><span>Xem trước</span></button>
+</div>
+<div class="ef-notice"><span class="ef-i">i</span>Chọn file nguồn và file đích, ghép các cột tương ứng, xem trước rồi xuất file.</div>
+<div class="ef-workspace">
+<section class="ef-card ef-files" id="efFiles">
+  <div class="ef-card-heading"><span class="ef-icon">▤</span><h2>File nguồn <small>(nhiều file)</small></h2></div>
+  <div aria-label="Kéo thả file Excel nguồn hoặc bấm chọn" class="filebox dropzone" id="sourceDrop" role="group" tabindex="0">
+<div class="drop-main"><span class="drop-ico">↧</span><span><strong>Thả nhiều file sao kê vào đây</strong><small>Chọn nhiều file một lượt hoặc thêm file lần sau</small></span></div>
+<input accept=".xlsx,.xlsm" aria-label="Chọn nhiều file dữ liệu nguồn" id="sourceFile" multiple="" type="file"/><div aria-live="polite" class="filename" id="srcName">Chưa chọn file nguồn</div>
+</div>
+  <div class="source-toolbar"><div><strong id="sourceFileCount">0 file nguồn</strong><p class="helper">Thứ tự từ trên xuống là thứ tự nhập. Dùng ↑ ↓ để đổi vị trí các tháng.</p></div><button class="btn" disabled="" id="clearSources" type="button">Xóa tất cả nguồn</button></div>
+  <div class="source-list" id="sourceList"><div class="source-list-empty">Chưa có file nguồn. Kéo nhiều file Excel vào khung phía trên.</div></div>
+  <div class="ef-card-heading ef-target-heading"><span class="ef-icon">▣</span><h2>File đích <small>(1 file)</small></h2></div>
+  <div aria-label="Kéo thả file Excel cần điền hoặc bấm chọn" class="filebox dropzone" id="targetDrop" role="group" tabindex="0">
+<div class="drop-main"><span class="drop-ico">↧</span><span><strong>Thả file Excel cần nhập</strong><small>Giữ nguyên file gốc và công thức</small></span></div>
+<input accept=".xlsx,.xlsm" aria-label="Chọn file Excel đích" id="targetFile" type="file"/><div aria-live="polite" class="filename" id="dstName">Chưa chọn file</div>
+</div>
+  <div class="ef-sheets"><div class="twocol" style="margin-top:14px"><div class="field"><label for="sourceSheet">Sheet của file nguồn đầu tiên (làm mẫu cột)</label><select id="sourceSheet"><option>Chọn file nguồn trước</option></select></div><div class="field"><label for="targetSheet">Sheet cần điền</label><select id="targetSheet"><option>Chọn file đích trước</option></select></div></div></div>
+</section>
+<section class="ef-card ef-mapping" id="efMapping">
+  <div class="ef-mapping-head"><div class="ef-card-heading"><span class="ef-icon">↔</span><h2>Ghép cột</h2></div>
+  <div class="ef-switches"><div class="option-toggle" title="Đảo thứ tự từ dưới lên trên của từng file nguồn">
+      <label class="switch"><input type="checkbox" id="reverse"><span class="switch-track"></span><span>Nhập ngược sao kê</span></label>
+    </div>
+    <div class="option-toggle" title="Không nhập các dòng chứa Tổng cộng, Tổng tiền, Total">
+      <label class="switch"><input type="checkbox" id="skipTotals" checked><span class="switch-track"></span><span>Bỏ dòng tổng cộng</span></label>
+    </div>
+    <div class="option-toggle" title="Chỉ nhập vào những dòng có công thức, không thay đổi chính ô công thức">
+      <label class="switch"><input type="checkbox" id="onlyFormulaRowsToggle"><span class="switch-track"></span><span>Chỉ dòng có công thức</span></label>
+    </div></div></div>
+  <div class="ef-map-head"><span>Dữ liệu nguồn</span><span></span><span>Cột đích</span><span>Kiểu dữ liệu</span><span>Tùy chọn</span><span></span></div>
+  <div class="mapping-list" id="mappingList"><div class="mapping-empty">Chưa có cột nào được ghép. Hãy chọn 2 cột phía trên.</div></div>
+  <div class="ef-addrow"><div class="mapping-builder">
+<div class="field"><label for="addSource">LẤY DỮ LIỆU TỪ</label><select id="addSource"><option value="">Chọn file nguồn trước</option></select></div>
+<div class="field"><label for="addTarget">GHI DỮ LIỆU VÀO</label><select id="addTarget"><option value="">Chọn file đích trước</option></select></div>
+<div class="field"><label for="addType">KIỂU DỮ LIỆU</label><select id="addType"><option value="auto">Giữ nguyên</option><option value="text">Văn bản / mã GD</option><option value="date">Ngày DD/MM/YYYY</option><option value="datetime">Ngày và giờ</option><option value="money">Số tiền VNĐ</option><option value="integer">Số nguyên</option><option value="decimal">Số thập phân</option><option value="percent">Phần trăm</option></select></div>
+<button class="btn primary" id="addPair" type="button">+ Thêm cặp cột này</button>
+</div></div>
+  <div class="ef-template-controls"><label for="efTemplateSelect">Mẫu ghép đã lưu</label><select id="efTemplateSelect"><option value="">Chọn mẫu để áp dụng</option></select><details class="adv-details" id="mappingDetails"><summary>▸ Tôi muốn nhập hoặc sửa quy tắc bằng chữ cột</summary><div class="adv-body"><p class="helper" style="margin:0 0 9px">Mỗi dòng một cặp: <b>D → A</b> hoặc <b>M → F</b>. Ký tự D, M là cột trong file nguồn; A, F là cột file đích.</p><div class="field"><label for="mapping">Các cặp nguồn → đích</label><textarea id="mapping" placeholder="D -&gt; A
+M -&gt; F" spellcheck="false"></textarea></div></div></details></div>
+</section>
+<aside class="ef-card ef-audit" id="efAudit">
+  <div class="ef-card-heading"><span class="ef-icon">⚖</span><h2>Đối chiếu</h2></div>
+  <div class="ef-metric-list">
+    <div class="ef-metric"><span>Giao dịch đã ghép</span><strong id="statRows">0</strong></div>
+    <div class="ef-metric"><span>Ô sẽ nhập</span><strong id="statChanges">0</strong></div>
+    <div class="ef-metric"><span>Mục bỏ qua</span><div class="ef-metric-right"><strong id="statSkipped">0</strong><button class="btn" disabled="" id="showSkipped" type="button">⌕ Xem chi tiết</button></div></div>
+  </div>
+  <div class="ef-result">
+    <div class="ef-card-heading ef-result-title"><span class="ef-icon">✓</span><h2>Kết quả kiểm tra</h2></div>
+    <div class="status" id="importStatus">Bước 1: Chọn file nguồn và file cần nhập.</div>
+    <p id="skipQuickText">Sau khi xem trước, bạn có thể biết chính xác dòng hoặc ô nào không được nhập.</p>
+    <div class="ef-preview-action"><button class="btn primary primary-action" id="previewBtn">⌕ Xem trước dữ liệu sẽ nhập</button></div><button type="button" class="ef-recon-link nav" id="navCompare">Xem đối chiếu chi tiết</button>
+  </div>
+</aside>
+</div>
+<section class="ef-preview-card" id="efPreview">
+  <div class="ef-preview-top"><div class="ef-card-heading"><span class="ef-icon">▤</span><h2>Xem trước kết quả</h2></div>
+  <div class="ef-preview-tabs" role="tablist" aria-label="Lọc kết quả xem trước">
+  <button class="ef-tab active" data-preview-filter="all" type="button">Tất cả <span id="efCountAll">0</span></button>
+  <button class="ef-tab" data-preview-filter="import" type="button">Sẽ nhập <span id="efCountImport">0</span></button>
+  <button class="ef-tab" data-preview-filter="matched" type="button">Đã ghép <span id="efCountMatched">0</span></button>
+  <button class="ef-tab" data-preview-filter="skipped" type="button">Bỏ qua <span id="efCountSkipped">0</span></button>
+  </div><div class="ef-preview-state"><span class="badge-small" id="previewLabel">Chưa phân tích</span></div></div>
+  <div id="efRowPreview" class="ef-row-preview"><div class="ef-blank">
+    <span class="ef-blank-icon">▦</span><strong>Chưa có dữ liệu xem trước</strong>
+    <span>Thêm file, ghép cột và bấm <b>Xem trước</b> để kiểm tra kết quả.</span>
+  </div></div>
+  <div class="ef-preview-bottom"><span id="efPreviewPagination">Chưa có kết quả</span><div class="ef-page-controls"><button type="button" id="efPrevPreview" aria-label="Trang trước">‹</button><span id="efPreviewPage">1</span><button type="button" id="efNextPreview" aria-label="Trang sau">›</button></div></div>
+  <details class="ef-detail-fold"><summary>Chi tiết các ô thay đổi (trước / sau)</summary><div class="ef-hidden-detail"><div class="preview-area" id="previewTable" style="display:none"></div><div class="empty" id="noPreview" style="margin-top:13px"><div class="big">▤</div><strong>Chưa có bản xem trước</strong><div style="font-size:12px;margin-top:7px">Thêm cặp cột ở bước 2, rồi bấm “Xem trước”.</div></div><p class="fineprint" id="previewFoot"></p></div></details>
+  <details class="ef-detail-fold"><summary>Kết quả theo từng file nguồn</summary><div class="ef-hidden-detail"><div class="file-results" id="fileResults" style="display:none"></div></div></details>
+  <div class="ef-skip-details"><section aria-labelledby="skipTitle" class="skip-panel" hidden="" id="skipDetails">
+<div class="hrow skip-head"><div><h3 id="skipTitle">Những dữ liệu không được nhập</h3><p class="helper">Xem lý do chính xác theo từng file, sheet, dòng và ô. Mục bỏ qua không đồng nghĩa với giao dịch bị mất. Các dòng nằm ngoài vùng giao dịch đã nhận diện không được tính vào mục bỏ qua.</p></div><button class="btn" disabled="" id="downloadSkips" type="button">⇩ Tải CSV</button></div>
+<div class="skip-stats" id="skipBreakdown"></div>
+<div class="skip-controls"><div class="field"><label for="skipReason">Lọc theo nguyên nhân</label><select id="skipReason"><option value="all">Tất cả nguyên nhân</option></select></div><div class="field"><label for="skipSearch">Tìm file, ô hoặc nội dung</label><input id="skipSearch" placeholder="Ví dụ: Tháng 6, M25, công thức" type="text"/></div></div>
+<div class="skip-table" id="skipTable"></div><p class="fineprint" id="skipFoot"></p>
+</section></div>
+</section>
+<details class="ef-settings"><summary><span class="ef-settings-icon">⚙</span> Cài đặt nhập liệu nâng cao <small>Đối chiếu theo mã, dòng nhập, định dạng và vùng dữ liệu</small></summary>
+<div class="ef-settings-grid">
+  <div class="ef-settings-group"><h3>Vùng dữ liệu & vị trí nhập</h3><label class="checkline multi-range-option"><input checked="" id="autoSourceRange" type="checkbox"/><span><b>Tự tìm vùng giao dịch riêng trong từng file</b><span class="muted" style="display:block;font-size:12px">Khuyên dùng cho sao kê các tháng có số dòng khác nhau.</span></span></label><div class="twocol" style="margin-top:14px;align-items:start"><div class="field"><label for="targetMode">Ứng dụng tìm vị trí nhập thế nào?</label><select id="targetMode"><option value="auto">✨ Tự tìm dòng trống phù hợp (khuyên dùng)</option><option value="manual">Tôi sẽ chỉ dòng bắt đầu</option></select></div><div class="field" id="manualTargetField" style="display:none"><label for="targetStart">Dòng bắt đầu của file đích</label><input id="targetStart" min="1" type="number" value="2"/></div></div><details class="adv-details" id="rangeDetails"><summary>⚙ Chỉnh vùng dữ liệu (chỉ cần khi ứng dụng nhận diện chưa đúng)</summary><div class="adv-body">
+<div class="twocol"><div class="field"><label for="headerRow">Dòng tiêu đề file nguồn</label><input id="headerRow" min="1" type="number" value="1"/><p class="helper">Là dòng chứa tên cột, ví dụ STT, Ngày giao dịch.</p></div><div class="field"><label for="targetHeaderRow">Dòng tiêu đề file cần điền</label><input id="targetHeaderRow" min="1" type="number" value="1"/><p class="helper">Nếu file đích bắt đầu tên cột ở dòng 5, chọn 5.</p></div><div class="field"><label for="sourceStart">Dòng giao dịch đầu tiên</label><input id="sourceStart" min="1" type="number" value="2"/></div><div class="field"><label for="sourceEnd">Dòng giao dịch cuối cùng</label><input id="sourceEnd" min="1" placeholder="Tự lấy đến cuối sheet" type="number"/></div></div>
+<button class="btn" id="detectRange" style="margin-top:11px" type="button">⌕ Tự tìm lại vùng giao dịch</button>
+</div></details><div aria-live="polite" class="smart-info neutral" id="sourceInsight">Sau khi chọn các sao kê, ứng dụng sẽ tự tìm các giao dịch và ô gộp của từng file.</div><div aria-label="Xem mẫu giao dịch từ file nguồn" class="mini-sample" id="sourcePeek" style="display:none"></div></div>
+  <div class="ef-settings-group"><h3>Quy tắc & định dạng</h3><div class="field" style="margin-top:14px"><label for="rowFilter">Chọn những dòng nào được ghi ở file đích</label><select id="rowFilter"><option value="all">Mọi dòng hợp lệ</option><option value="withFormula">Chỉ dòng đang có công thức (không ghi đè ô công thức)</option><option value="withoutFormula">Chỉ dòng không có công thức</option></select></div><label class="checkline"><input type="checkbox" id="skipEmpty" checked> Bỏ dòng trống</label><button class="btn bank-btn" id="bankPreset" type="button">↕ Áp dụng cài đặt nhanh cho sao kê ngân hàng</button><details class="adv-details"><summary>⚙ Các tùy chọn khác (ghép bằng mã, dữ liệu trống, định dạng vùng)</summary><div class="adv-body">
+<div class="twocol"><div class="field"><label for="matchMode">Ghép giao dịch như thế nào?</label><select id="matchMode"><option value="position">Theo thứ tự từ trên xuống</option><option value="key">Dò theo mã giao dịch / mã chung</option></select></div><div class="field"><label for="writeMode">Nếu ô đích đã có dữ liệu</label><select id="writeMode"><option value="replace">Thay giá trị cũ (trừ công thức)</option><option value="empty">Chỉ ghi khi ô trống</option></select></div></div>
+<div class="twocol" id="keys" style="display:none;margin-top:12px"><div class="field"><label for="sourceKey">Cột chứa mã ở file nguồn</label><select id="sourceKey"></select></div><div class="field"><label for="targetKey">Cột chứa mã ở file đích</label><select id="targetKey"></select></div></div>
+<label class="checkline"><input checked="" id="skipBlank" type="checkbox"/> Không xóa ô đích khi ô nguồn trống</label>
+<div class="field" style="margin-top:12px"><label for="totalTerms">Các từ khóa nhận diện dòng tổng cộng</label><input id="totalTerms" type="text" value="Tổng cộng, Tổng số, Tổng tiền, Tổng, Cộng, Total, Subtotal, Grand total"/></div>
+<hr class="splitrule"/><div class="field"><label for="fmtWhere">Cột/dòng/vùng cần định dạng</label><input id="fmtWhere" placeholder="D hoặc E5:E50" type="text"/></div>
+<div class="twocol" style="margin-top:9px"><div class="field"><label for="fmtType">Định dạng</label><select id="fmtType"><option value="text">Văn bản</option><option value="integer">Số nguyên</option><option value="decimal">Số thập phân</option><option value="money">Số tiền</option><option value="date">Ngày DD/MM/YYYY</option><option value="datetime">Ngày và giờ</option><option value="date-iso">Ngày YYYY-MM-DD</option><option value="percent">Phần trăm</option><option value="number">Số thông thường</option><option value="custom">Mã định dạng riêng</option><option value="auto">Giữ nguyên</option></select></div><div class="field" id="customFmtField" style="display:none"><label>Mã định dạng Excel</label><input id="fmtCustom" placeholder="#,##0.000" type="text"/></div></div>
+<div class="actions" style="margin-top:12px"><button class="btn" id="addFormat" type="button">+ Thêm định dạng</button><button class="btn" id="clearFormat" type="button">Xóa các định dạng</button></div>
+<div class="field" style="margin-top:12px"><label for="formatRules">Danh sách định dạng đã chọn</label><textarea id="formatRules" placeholder="D -&gt; date
+E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
+<p class="helper">Thường không cần chỉnh phần này nếu bạn đã chọn loại dữ liệu khi thêm cặp cột ở bước 2.</p>
+</div></details></div>
+</div></details>
+<p class="ef-security-note">Dữ liệu được xử lý trên thiết bị. File nguồn và file đích gốc không bị chỉnh sửa.</p>
+</section>
+<section class="section" id="comparePage"><button type="button" class="ef-page-return" data-return-home>← Về trang nhập liệu</button>
+<div class="top"><div><h1>Đối chiếu số liệu trước khi nhập</h1><p class="sub">So tổng số liệu giữa 2 file theo các cột và dòng bạn đã ghép, trước và sau khi nhập dự kiến.</p></div><span class="pill" id="reconBadge">Chưa đối chiếu</span></div>
+<div class="panel"><div class="hrow"><div><h2 style="margin-bottom:7px">Bảng đối chiếu theo cặp cột</h2><p class="helper">Bảng tính chỉ cộng các giá trị số ở những dòng đã ghép; không tự tính lại công thức Excel.</p></div><div class="actions"><button class="btn primary" id="goPreview">↗ Về trang nhập / xem trước</button><button class="btn" disabled="" id="reconDownload">⇩ Xuất CSV đối chiếu</button></div></div>
+<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><strong id="reconRows">0</strong><small>Dòng đã ghép</small></div><div class="kpi"><strong id="reconMismatches">0</strong><small>Giá trị khác dự kiến sau nhập</small></div><div class="kpi em"><strong id="reconPairs">0</strong><small>Cặp cột được kiểm tra</small></div></div>
+<div class="status" id="reconStatus">Hãy chọn các file nguồn, một file đích, ghép cột và bấm “Xem trước dữ liệu”.</div><div class="preview-area" id="reconTable"></div>
+<p class="fineprint">Giá trị “sau nhập” là mô phỏng các ô sẽ ghi, <strong>không bao gồm kết quả tính lại từ công thức</strong>. Số liệu chênh lệch cần kiểm tra trực tiếp trên Excel sau khi mở file xuất.</p></div>
+<div class="panel" style="margin-top:20px"><h2>Những dòng chênh lệch</h2><p class="helper">Hiện tối đa 150 dòng số khác nhau giữa nguồn và bản đích dự kiến. Toàn bộ có trong CSV đối chiếu.</p><div class="preview-area" id="reconDifferences"></div></div>
+</section>
+<section class="section" id="historyPage"><button type="button" class="ef-page-return" data-return-home>← Về trang nhập liệu</button>
+<div class="top"><div><h1>Xem lại dữ liệu cũ</h1><p class="sub">Lưu phiên bản trước &amp; sau, tải lại Excel và kiểm tra từng thay đổi.</p></div><span class="pill" id="historyCountPill">0 lần nhập đã lưu</span></div>
+<div class="panel"><div class="hrow"><div><strong>Kho lưu trữ tại máy</strong><p class="helper">Tồn tại trên trình duyệt này. Để giữ lịch sử khi đổi máy hoặc xóa dữ liệu trình duyệt, hãy sao lưu.</p></div><div class="actions"><button class="btn" id="backupHistory">⇩ Sao lưu lịch sử</button><button class="btn" id="restoreHistory">⇧ Khôi phục sao lưu</button><input accept=".zip" hidden="" id="restoreFile" type="file"/></div></div></div>
+<div class="history-grid"><div class="panel"><h2>Những lần nhập trước</h2><div class="history-list" id="historyList"><div class="empty">Chưa có lịch sử.</div></div></div>
+<div class="panel"><div class="empty" id="historyEmpty"><div class="big">◷</div><strong>Chọn một lần nhập</strong><p>Những bản Excel cũ và nhật ký sẽ được hiển thị ở đây.</p></div>
+<div id="historyDetail" style="display:none"><div class="hrow"><div><h2 id="historyTitle" style="margin:0"></h2><p class="viewer-meta" id="historyDesc"></p></div><button class="btn danger" id="deleteHistory">Xóa bản ghi</button></div><hr class="splitrule"/><div class="historybuttons"><button class="btn" id="downloadSource">⇩ File nguồn (ZIP nếu nhiều)</button><button class="btn" id="downloadBefore">⇩ File trước</button><button class="btn teal" id="downloadAfter">⇩ File sau</button><button class="btn" id="downloadLog">⇩ Nhật ký CSV</button><button class="btn" id="downloadSkippedHistory">⇩ Bỏ qua CSV</button></div><div class="tabs" style="margin:15px 0"><button class="active" data-view="changes">Các ô đã thay đổi</button><button data-view="before">Dữ liệu trước</button><button data-view="after">Dữ liệu sau</button><button data-view="reconcile">Đối chiếu</button><button data-view="skips">Dữ liệu bỏ qua</button></div><div class="status" id="historyMeta"></div><div class="preview-area" id="historyView" style="max-height:550px"></div><div class="pagebar"><button class="btn" id="prevPage">‹ Trước</button><span id="pageInfo"></span><button class="btn" id="nextPage">Tiếp ›</button></div></div>
+</div></div>
+</section>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<div id="efApprovalOverlay" class="ef-approval-overlay" hidden>
+ <div class="ef-approval-dialog" role="dialog" aria-modal="true" aria-labelledby="efApprovalTitle" aria-describedby="efApprovalDesc">
+  <div class="ef-approval-symbol" aria-hidden="true">?</div>
+  <h2 class="ef-approval-title" id="efApprovalTitle">Xác nhận thao tác</h2>
+  <p class="ef-approval-desc" id="efApprovalDesc"></p>
+  <div class="ef-approval-actions"><button type="button" id="efApprovalCancel">Hủy</button><button type="button" id="efApprovalYes" class="ef-approval-yes">Đồng ý</button></div>
+ </div>
+</div>
+<script src="js/approval.js"></script>
+<script src="js/jszip.min.js"></script>
+<script src="js/excel-engine.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/search-crud.js"></script>
+
+
+</body></html>
