@@ -158,7 +158,7 @@
   const matchMode=el('matchMode').value,sourceKey=Number(el('sourceKey').value),targetKey=Number(el('targetKey').value);
   if(matchMode==='key'&&(!sourceKey||!targetKey))throw Error('Hãy chọn 2 cột dùng để dò mã chung.');
   return {src,dst,sources,sourceSheet:src.name,targetSheet:dst.name,sourceStart,sourceEnd,autoRange,targetStart,targetMode,headerRow,targetHeaderRow,mappings,matchMode,sourceKey,targetKey,writeMode:el('writeMode').value,skipBlank:el('skipBlank').checked,skipEmpty:el('skipEmpty').checked,reverse:el('reverse').checked,
-    skipTotals:el('skipTotals').checked,totalTerms:totalTerms(el('totalTerms').value),rowFilter:el('rowFilter').value,formatRules:parseFormats(el('formatRules').value)};
+    skipTotals:el('skipTotals').checked,skipZeros:el('skipZeros')?.checked||false,totalTerms:totalTerms(el('totalTerms').value),rowFilter:el('rowFilter').value,formatRules:parseFormats(el('formatRules').value)};
  }
 
  // Import filters, explicit data types and Excel number formats.
@@ -361,6 +361,7 @@
      summary.examined++;fileStats[sourceIndex].read++;
      if(cfg.skipEmpty&&!cfg.mappings.some(m=>{const v=cellValue(src,sourceBook,sr,m.source);return v&&v.kind!=='e'&&v.raw!=='';})){
        summary.skippedEmpty++;skipDetails.push(skipRecord('empty_row','row',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:'Dòng '+sr}));continue;}
+      if(cfg.skipZeros&&cfg.mappings.some(m=>{const raw=cellValue(src,sourceBook,sr,m.source);if(!raw||raw.raw===''||raw.kind==='e')return false;const clean=String(raw.raw).replace(/[^\d.-]/g,'').trim();return clean==='0'||clean==='0.0'||clean==='0.00';})){summary.skippedZeros=(summary.skippedZeros||0)+1;skipDetails.push(skipRecord('zero_value','row',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:'Dòng '+sr,dest:'Số tiền = 0'}));continue;}
      let tr;
      if(cfg.matchMode==='position'){
        if(cfg.rowFilter!=='all'||cfg.targetMode==='auto'){
@@ -511,7 +512,7 @@
   el('previewFoot').textContent='Hiển thị tối đa 150 ô đầu tiên. Bản Excel xuất sẽ bao gồm tất cả '+niceNum(result.changes.length)+' ô; nhật ký đầy đủ có thể tải trong Lịch sử.';
  }
  async function preview(){if(loading)return;try{loading=true;el('previewBtn').disabled=true;message('Đang kiểm tra dữ liệu…');await sleep();const cfg=await extractSettings();plan=analyze(cfg);planSettings=JSON.stringify(collectUI());showPreview(plan);showReconciliation(plan);el('exportBtn').disabled=plan.changes.length===0||plan.summary.unmatched>0;if(plan.summary.unmatched)toast('Còn '+plan.summary.unmatched+' giao dịch chưa có dòng đích. Hãy chuẩn bị đủ dòng trống hoặc kiểm tra mã trước khi xuất.');else if(!plan.changes.length)toast('Không phát hiện ô nào cần nhập.');}catch(e){plan=null;el('exportBtn').disabled=true;message('Lỗi: '+e.message,'err');toast(e.message);}finally{loading=false;el('previewBtn').disabled=false;}}
- function collectUI(){const ids=['autoSourceRange','headerRow','targetHeaderRow','sourceStart','sourceEnd','targetStart','targetMode','sourceSheet','targetSheet','mapping','matchMode','writeMode','sourceKey','targetKey','skipBlank','skipEmpty','reverse','skipTotals','totalTerms','rowFilter','formatRules'];return {fields:ids.map(id=>{const node=el(id);return [id,node.type==='checkbox'?node.checked:node.value];}),sources:srcEntries.map(x=>[x.id,x.sheet,x.file.name,x.file.size,x.file.lastModified])};}
+ function collectUI(){const ids=['autoSourceRange','headerRow','targetHeaderRow','sourceStart','sourceEnd','targetStart','targetMode','sourceSheet','targetSheet','mapping','matchMode','writeMode','sourceKey','targetKey','skipBlank','skipEmpty','reverse','skipTotals','skipZeros','totalTerms','rowFilter','formatRules'];return {fields:ids.map(id=>{const node=el(id);return [id,node.type==='checkbox'?node.checked:node.value];}),sources:srcEntries.map(x=>[x.id,x.sheet,x.file.name,x.file.size,x.file.lastModified])};}
  async function exportResult(){
   if(loading)return;
   if(!plan||!plan.changes.length){toast('Hãy xem trước dữ liệu trước khi xuất.');return;}
@@ -856,7 +857,7 @@
   el('sourceSheet').addEventListener('change',async()=>{if(srcEntries[0])srcEntries[0].sheet=el('sourceSheet').value;refreshSourceUI();invalidate();await showSourceSummary({autoSet:true});});
   el('targetSheet').addEventListener('change',()=>{invalidate();refreshCols();});
   ['headerRow','targetHeaderRow'].forEach(id=>el(id).addEventListener('change',()=>{invalidate();refreshCols();if(id==='headerRow'&&srcBook)showSourceSummary({autoSet:false});}));
-  ['autoSourceRange','sourceStart','sourceEnd','targetStart','targetMode','mapping','matchMode','writeMode','sourceKey','targetKey','skipBlank','skipEmpty','reverse','skipTotals','totalTerms','rowFilter','formatRules'].forEach(id=>el(id).addEventListener('change',invalidate));
+  ['autoSourceRange','sourceStart','sourceEnd','targetStart','targetMode','mapping','matchMode','writeMode','sourceKey','targetKey','skipBlank','skipEmpty','reverse','skipTotals','skipZeros','totalTerms','rowFilter','formatRules'].forEach(id=>el(id).addEventListener('change',invalidate));
   el('mapping').addEventListener('input',()=>{invalidate();renderMappingList();});el('formatRules').addEventListener('input',()=>{invalidate();renderMappingList();});el('totalTerms').addEventListener('input',invalidate);
   el('sourceStart').addEventListener('change',()=>{el('autoSourceRange').checked=false;invalidate();srcBook&&showSourceSummary({autoSet:false});});
   el('sourceEnd').addEventListener('change',()=>{el('autoSourceRange').checked=false;invalidate();srcBook&&showSourceSummary({autoSet:false});});

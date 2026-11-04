@@ -44,7 +44,8 @@
             <div class="field"><label for="efModalFilter">Lọc trạng thái</label><select id="efModalFilter"><option value="all">Tất cả</option><option value="import">Sẽ nhập</option><option value="matched">Đã ghép</option><option value="skipped">Bỏ qua</option></select></div>
             <button type="button" class="toolbtn" id="efModalAdd">+ Thêm dòng</button>
             <button type="button" class="toolbtn" id="efModalEdit">Sửa dòng</button>
-            <button type="button" class="toolbtn" id="efModalDelete">Xóa dòng</button>
+            <button type="button" class="toolbtn warn" id="efModalRemoveZeros" title="Tự động lọc và xóa các dòng có số tiền bằng 0 khỏi bảng xem trước">⊘ Loại số 0</button>
+            <button type="button" class="toolbtn danger" id="efModalDelete">Xóa dòng</button>
           </div>
           <div class="ef-modal-stats" id="efModalStats"></div>
           <div class="ef-modal-body">
@@ -224,6 +225,59 @@
     renderModalTable();
   }
 
+    function isZeroValue(v){
+    if(v === 0 || v === '0') return true;
+    if(typeof v === 'string'){
+      const s = v.trim();
+      if(s === '0' || s === '0.0' || s === '0,0' || s === '0.00' || s === '0,00' || s === '-0') return true;
+      const clean = s.replace(/[^\d.-]/g, '');
+      if(clean === '0' || clean === '0.0' || clean === '0.00') return true;
+    }
+    return false;
+  }
+
+  function isZeroRow(r){
+    if(!r || !r.values) return false;
+    for(const col of modalColumns){
+      const cName = (col.name || '').toLowerCase();
+      const val = r.values[col.id];
+      if(cName.includes('tiền') || cName.includes('amount') || cName.includes('giá') || cName.includes('st') || cName.includes('nợ') || cName.includes('có') || cName.includes('thu') || cName.includes('chi')){
+        if(isZeroValue(val)) return true;
+      }
+    }
+    for(const val of Object.values(r.values)){
+      if(isZeroValue(val)) return true;
+    }
+    return false;
+  }
+
+  function removeZeroRows(){
+    const zeroRows = modalRows.filter(r => isZeroRow(r));
+    if(!zeroRows.length){
+      if(typeof window.efToast === 'function') window.efToast('Không tìm thấy dòng nào có giá trị bằng 0.');
+      else alert('Không tìm thấy dòng nào có giá trị bằng 0.');
+      return;
+    }
+    const ok = window.confirm('Tìm thấy ' + zeroRows.length + ' dòng có số tiền bằng 0. Bạn có chắc muốn loại bỏ toàn bộ các dòng này khỏi danh sách xem trước?');
+    if(!ok) return;
+
+    modalRows = modalRows.filter(r => !isZeroRow(r));
+    if(selectedRowId && zeroRows.some(r => r._id === selectedRowId)) selectedRowId = null;
+
+    if(window.__excelFlowPreview && Array.isArray(window.__excelFlowPreview.changes)){
+      const remainingKeys = new Set(modalRows.map(r => r._id));
+      window.__excelFlowPreview.changes = window.__excelFlowPreview.changes.filter(ch => {
+        const key = 'row_' + ch.sourceIndex + '|' + ch.row;
+        return remainingKeys.has(key);
+      });
+    }
+
+    renderModalTable();
+    const msg = 'Đã loại bỏ ' + zeroRows.length + ' dòng có số tiền bằng 0!';
+    if(typeof window.efToast === 'function') window.efToast(msg);
+    else alert(msg);
+  }
+
   function deleteSelected(){
     if(!selectedRowId){ alert('Bạn hãy chọn một dòng trước khi xóa.'); return; }
     const row = modalRows.find(r => r._id === selectedRowId);
@@ -244,6 +298,7 @@
     $('efModalFilter')?.addEventListener('change', renderModalTable);
     $('efModalAdd')?.addEventListener('click', () => openEditor('add'));
     $('efModalEdit')?.addEventListener('click', () => openEditor('edit'));
+    $('efModalRemoveZeros')?.addEventListener('click', removeZeroRows);
     $('efModalDelete')?.addEventListener('click', deleteSelected);
     $('efEditorCancel')?.addEventListener('click', closeEditor);
     $('efEditorSave')?.addEventListener('click', saveEditor);

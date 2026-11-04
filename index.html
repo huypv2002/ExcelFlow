@@ -9,21 +9,23 @@
 <body>
 <div class="ef-app">
 <header class="ef-header" id="efHeader" style="display:none">
-  <div class="ef-brand">
-    <span class="ef-logo"><b>X</b></span>
-    <button id="navHome" class="ef-brand-link nav active" type="button" title="Về trang chủ">ExcelFlow Suite</button>
-    <span class="ef-brand-sep"></span>
-    <span class="ef-tagline">Trung tâm Công cụ Excel Thông minh</span>
-  </div>
-  <nav class="ef-main-nav">
-    <button id="navHomeTab" class="ef-nav-tab active" type="button" data-nav-home>🏠 Trang chủ</button>
-    <button id="navImport" class="ef-nav-tab" type="button" data-nav-import>⚡ Ghép &amp; Nhập liệu</button>
-    <button id="navHistory" class="ef-nav-tab" type="button"><span class="ef-clock">◷</span> Lịch sử</button>
-  </nav>
-  <div class="ef-header-actions">
-    <div class="ef-header-badge"><span class="ef-pulse-dot"></span> Offline 100%</div>
-    <button type="button" class="ef-outline" id="efSaveTemplate" style="display:none">▱ &nbsp; Lưu mẫu</button>
-    <button class="btn teal primary-action" disabled="" id="exportBtn" style="display:none">⇩ Xuất file Excel mới</button>
+  <div class="ef-header-container">
+    <div class="ef-brand">
+      <span class="ef-logo"><b>X</b></span>
+      <button id="navHome" class="ef-brand-link nav active" type="button" title="Về trang chủ">ExcelFlow Suite</button>
+      <span class="ef-brand-sep"></span>
+      <span class="ef-tagline">Trung tâm Công cụ Excel Thông minh</span>
+    </div>
+    <nav class="ef-main-nav">
+      <button id="navHomeTab" class="ef-nav-tab active" type="button" data-nav-home>🏠 Trang chủ</button>
+      <button id="navImport" class="ef-nav-tab" type="button" data-nav-import>⚡ Ghép &amp; Nhập liệu</button>
+      <button id="navHistory" class="ef-nav-tab" type="button"><span class="ef-clock">◷</span> Lịch sử</button>
+    </nav>
+    <div class="ef-header-actions">
+      <div class="ef-header-badge"><span class="ef-pulse-dot"></span> Offline 100%</div>
+      <button type="button" class="ef-outline" id="efSaveTemplate" style="display:none">▱ &nbsp; Lưu mẫu</button>
+      <button class="btn teal primary-action" disabled="" id="exportBtn" style="display:none">⇩ Xuất file Excel mới</button>
+    </div>
   </div>
 </header>
 <div class="ef-shell">
@@ -125,6 +127,9 @@
     </div>
     <div class="option-toggle" title="Không nhập các dòng chứa Tổng cộng, Tổng tiền, Total">
       <label class="switch"><input type="checkbox" id="skipTotals" checked><span class="switch-track"></span><span>Bỏ dòng tổng cộng</span></label>
+    </div>
+    <div class="option-toggle" title="Tự động bỏ qua các dòng có số tiền hoặc giá trị bằng 0">
+      <label class="switch"><input type="checkbox" id="skipZeros"><span class="switch-track"></span><span>Bỏ dòng tiền 0</span></label>
     </div>
     <div class="option-toggle" title="Chỉ nhập vào những dòng có công thức, không thay đổi chính ô công thức">
       <label class="switch"><input type="checkbox" id="onlyFormulaRowsToggle"><span class="switch-track"></span><span>Chỉ dòng có công thức</span></label>

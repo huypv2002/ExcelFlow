@@ -58,7 +58,7 @@ body{font-size:14px;line-height:1.58;color:var(--ink)}
 .mapping-row .mapping-name small{display:block;font-size:10px;color:#8ca0b3;font-weight:500}
 .mapping-row .mapping-arrow{text-align:center;color:#15977e;font-size:18px}
 .mapping-row .remove-map{border:0;background:#fff1f0;color:#be5252;width:25px;height:25px;border-radius:8px;font-size:15px;font-weight:700}
-.mapping-empty{padding:18px;text-align:center;border:1px dashed #cad8e6;border-radius:11px;color:#8393a7;font-size:12px;margin-top:12px}
+.mapping-empty{padding:40px 18px;text-align:center;border:none;border-radius:11px;color:#8393a7;font-size:13px;margin:0}
 .adv-details{border:1px solid #e4ebf3;background:#fafcff;border-radius:11px;margin-top:13px;overflow:hidden}
 .adv-details summary{padding:12px 14px;cursor:pointer;user-select:none;color:#466585;font-size:12px;font-weight:780}
 .adv-body{border-top:1px solid #e4ebf3;padding:15px;background:#fff}
@@ -246,7 +246,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
  .ef-switches label{font-size:12px;line-height:1.4}
  .ef-map-head{display:none}
  #mappingList{max-height:none;min-height:0;overflow:visible;border:0;border-radius:0}
- .ef-mapping .mapping-empty{padding:27px 12px;border:1px dashed #cfddec;border-radius:10px}
+ .ef-mapping .mapping-empty{padding:40px 12px;border:none;border-radius:10px}
  .ef-mapping .mapping-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;gap:8px;align-items:center;position:relative;padding:14px 12px 12px;border:1px solid #dbe4ed;border-radius:11px;margin:8px 0;background:#fff;min-height:0}
  .ef-mapping .mapping-row .mapping-name{min-width:0;overflow-wrap:anywhere;white-space:normal;line-height:1.4;font-size:12px}
  .ef-mapping .mapping-row .mapping-name:first-child{grid-column:1;grid-row:1;padding-top:17px}
@@ -353,7 +353,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 @media(max-width:640px){.ef-preview-tools{width:auto!important;margin-left:auto!important}.ef-preview-tools #efOpenPreviewExpand{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}}
 
 /* ==========================================================================
-   Fix UI: Loại bỏ Double Frame và Khắc phục lệch hàng 2 ô chọn Sheet
+   Fix UI: Loại bỏ Double Frame, Khắc phục lệch hàng 2 ô chọn Sheet & Căn giữa Layout
    ========================================================================== */
 
 /* 1. Loại bỏ Double Frame ở khung ghép cột */
@@ -421,4 +421,90 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
   color: #1e293b !important;
   box-sizing: border-box !important;
 }
+
+/* 3. Căn giữa toàn bộ Layout và tạo khoảng đệm an toàn lề phải */
+.ef-header {
+  width: 100% !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid #e3e9f1 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  padding: 0 clamp(20px, 3.5vw, 48px) !important;
+  box-sizing: border-box !important;
+}
+
+.ef-header-container {
+  width: 100% !important;
+  max-width: 1420px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.ef-shell {
+  width: 100% !important;
+  max-width: 1420px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-top: 20px !important;
+  padding-bottom: 50px !important;
+  padding-left: clamp(20px, 3.5vw, 48px) !important;
+  padding-right: clamp(20px, 3.5vw, 48px) !important; /* Khoảng đệm an toàn lề phải */
+  box-sizing: border-box !important;
+}
+
+.ef-steps {
+  max-width: 860px !important;
+  margin: 0 auto 16px !important;
+}
+
+.ef-notice {
+  max-width: 100% !important;
+  margin-bottom: 18px !important;
+  box-sizing: border-box !important;
+}
+
+.ef-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(270px, 28%) minmax(420px, 1fr) minmax(250px, 25%) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.ef-workspace > * {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.ef-preview-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 4. Nút bấm Loại dòng số 0 trong Modal Toolbar */
+.ef-modal-toolbar .toolbtn.warn {
+  background: #fff7ed !important;
+  color: #c2410c !important;
+  border: 1.5px solid #fed7aa !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.ef-modal-toolbar .toolbtn.warn:hover {
+  background: #ffedd5 !important;
+  border-color: #fb923c !important;
+  color: #9a3412 !important;
+  transform: translateY(-1px) !important;
+}
+
 
