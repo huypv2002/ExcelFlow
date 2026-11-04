@@ -727,8 +727,35 @@
   }
 
  // Events and offline initialization.
- function goPage(which){const history=which==='history',compare=which==='compare';el('importPage').classList.toggle('active',!history&&!compare);el('comparePage').classList.toggle('active',compare);el('historyPage').classList.toggle('active',history);el('navImport').classList.toggle('active',!history&&!compare);el('navCompare').classList.toggle('active',compare);el('navHistory').classList.toggle('active',history);if(history)showHistories();if(compare&&plan)showReconciliation(plan);}
- el('navImport').onclick=()=>goPage('import');el('navCompare').onclick=()=>goPage('compare');el('navHistory').onclick=()=>goPage('history');
+ function goPage(which){
+   const history=which==='history',compare=which==='compare',home=which==='home';
+   const isImport=!history&&!compare&&!home;
+   el('homePage')?.classList.toggle('active',home);
+   el('importPage')?.classList.toggle('active',isImport);
+   el('comparePage')?.classList.toggle('active',compare);
+   el('historyPage')?.classList.toggle('active',history);
+
+   el('navHome')?.classList.toggle('active',home);
+   el('navHomeTab')?.classList.toggle('active',home);
+   el('navImport')?.classList.toggle('active',isImport);
+   el('navCompare')?.classList.toggle('active',compare);
+   el('navHistory')?.classList.toggle('active',history);
+
+   if(el('efSaveTemplate')) el('efSaveTemplate').style.display = isImport ? '' : 'none';
+   if(el('exportBtn')) el('exportBtn').style.display = isImport ? '' : 'none';
+
+   if(history)showHistories();
+   if(compare&&plan)showReconciliation(plan);
+   window.scrollTo({top:0,behavior:'smooth'});
+ }
+ window.efGoPage=goPage;
+ el('navHome')?.addEventListener('click',()=>goPage('home'));
+ el('navHomeTab')?.addEventListener('click',()=>goPage('home'));
+ el('navImport').onclick=()=>goPage('import');
+ el('navCompare').onclick=()=>goPage('compare');
+ el('navHistory').onclick=()=>goPage('history');
+ document.querySelectorAll('[data-nav-home]').forEach(btn=>btn.addEventListener('click',()=>goPage('home')));
+ document.querySelectorAll('[data-nav-import]').forEach(btn=>btn.addEventListener('click',()=>goPage('import')));
  // Source files are additive; only the destination remains a single file.
  const fileVersions={source:0,target:0};
  function fileIdentity(file){return [file.name,file.size,file.lastModified].join('::');}

@@ -1,0 +1,711 @@
+/* ==========================================================================
+   ExcelFlow Suite — Trang chủ App Workspace Hub Styles
+   ========================================================================== */
+
+/* Header Navigation Bar */
+.ef-main-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f4f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-left: 14px;
+}
+
+.ef-nav-tab {
+  border: 0;
+  background: transparent;
+  color: #556882;
+  font-size: 13px;
+  font-weight: 650;
+  padding: 7px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.ef-nav-tab:hover {
+  background: #e2ecf7;
+  color: #17243b;
+}
+
+.ef-nav-tab.active {
+  background: #ffffff;
+  color: #0b816d;
+  font-weight: 750;
+  box-shadow: 0 2px 6px rgba(18, 155, 142, 0.12), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ef-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f7f3;
+  color: #0a846f;
+  border: 1px solid #b7ecde;
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.ef-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: ef-pulse 2s infinite;
+}
+
+@keyframes ef-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Breadcrumb in Sub-pages */
+.ef-page-breadcrumb {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.ef-back-home-btn {
+  border: 0;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.ef-back-home-btn:hover {
+  background: #0ea5e9;
+  color: #ffffff;
+  transform: translateX(-2px);
+}
+
+.ef-badge-active-tool {
+  font-size: 12px;
+  font-weight: 650;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+/* ==========================================================================
+   Home Page Layout & Components
+   ========================================================================== */
+.ef-home-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 0 60px;
+}
+
+/* Hero Banner */
+.ef-hero-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0e2744 0%, #17385e 60%, #10444c 100%);
+  color: #ffffff;
+  border-radius: 22px;
+  padding: 46px 42px 42px;
+  margin-bottom: 34px;
+  box-shadow: 0 16px 40px rgba(14, 39, 68, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ef-hero-card::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(18, 155, 142, 0.35) 0%, rgba(18, 155, 142, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ef-hero-card::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: 20%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, rgba(37, 99, 235, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ef-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+}
+
+.ef-hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  color: #6ee7b7;
+  border: 1px solid rgba(110, 231, 183, 0.3);
+  padding: 6px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.4px;
+  margin-bottom: 18px;
+}
+
+.ef-hero-title {
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: -1px;
+  margin: 0 0 14px;
+  color: #ffffff;
+}
+
+.ef-hero-title span {
+  background: linear-gradient(120deg, #5eead4, #93c5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ef-hero-desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #cbd5e1;
+  margin: 0 0 28px;
+  max-width: 720px;
+}
+
+.ef-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ef-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ef-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #5eead4;
+  font-size: 18px;
+}
+
+.ef-stat-text strong {
+  display: block;
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 750;
+}
+
+.ef-stat-text span {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Hub Controls & Search Bar */
+.ef-hub-controls {
+  margin-bottom: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ef-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ef-search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.ef-search-input {
+  width: 100%;
+  height: 52px;
+  padding: 0 20px 0 52px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 15px;
+  color: #1e293b;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.ef-search-input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
+}
+
+.ef-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ef-filter-btn {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 650;
+  padding: 8px 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ef-filter-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.ef-filter-btn.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(15, 118, 110, 0.25);
+}
+
+/* Ecosystem App Grid */
+.ef-app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 22px;
+  margin-bottom: 40px;
+}
+
+/* App Card */
+.ef-app-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.ef-app-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  border-color: #cbd5e1;
+}
+
+/* Featured / Active Card */
+.ef-app-card.featured {
+  border: 2px solid #0d9488;
+  background: linear-gradient(180deg, #f7fffd 0%, #ffffff 40%);
+  box-shadow: 0 8px 26px rgba(13, 148, 136, 0.12);
+}
+
+.ef-app-card.featured:hover {
+  border-color: #0f766e;
+  box-shadow: 0 16px 36px rgba(13, 148, 136, 0.2);
+}
+
+.ef-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.ef-card-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.icon-teal { background: linear-gradient(135deg, #e6fffa, #b2f5ea); color: #0d9488; }
+.icon-indigo { background: linear-gradient(135deg, #eef2ff, #c7d2fe); color: #4f46e5; }
+.icon-orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
+.icon-blue { background: linear-gradient(135deg, #eff6ff, #bfdbfe); color: #2563eb; }
+.icon-emerald { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); color: #059669; }
+.icon-purple { background: linear-gradient(135deg, #faf5ff, #e9d5ff); color: #9333ea; }
+.icon-amber { background: linear-gradient(135deg, #fffbeb, #fde68a); color: #d97706; }
+.icon-rose { background: linear-gradient(135deg, #fff1f2, #fecdd3); color: #e11d48; }
+
+.ef-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 750;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ef-status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.ef-status-badge.upcoming {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.ef-card-category {
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+.ef-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 9px;
+  line-height: 1.35;
+}
+
+.ef-card-desc {
+  font-size: 13.5px;
+  color: #475569;
+  line-height: 1.58;
+  margin: 0 0 18px;
+  flex-grow: 1;
+}
+
+.ef-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.ef-tag {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+
+.ef-app-card.featured .ef-tag {
+  background: #e6f8f5;
+  color: #0d7a6e;
+}
+
+.ef-card-action {
+  margin-top: auto;
+}
+
+.ef-launch-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: 0;
+  transition: all 0.2s ease;
+}
+
+.ef-launch-btn.primary {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.ef-launch-btn.primary:hover {
+  background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.4);
+  transform: translateY(-1px);
+}
+
+.ef-launch-btn.outline {
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+}
+
+.ef-launch-btn.outline:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Trust & Architecture Section */
+.ef-trust-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 34px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  margin-bottom: 20px;
+}
+
+.ef-trust-heading {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 30px;
+}
+
+.ef-trust-heading h3 {
+  font-size: 21px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.ef-trust-heading p {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.ef-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.ef-trust-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+}
+
+.ef-trust-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.ef-trust-item-info h4 {
+  font-size: 15px;
+  font-weight: 750;
+  color: #1e293b;
+  margin: 0 0 5px;
+}
+
+.ef-trust-item-info p {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Feature Preview Modal */
+.ef-feature-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: ef-fade-in 0.2s ease;
+}
+
+.ef-feature-modal {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  animation: ef-modal-slide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ef-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ef-modal-slide {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ef-fmodal-header {
+  padding: 22px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ef-fmodal-title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ef-fmodal-icon {
+  font-size: 26px;
+}
+
+.ef-fmodal-title-box h3 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+}
+
+.ef-fmodal-close {
+  background: #f1f5f9;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  display: grid;
+  place-items: center;
+}
+
+.ef-fmodal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.ef-fmodal-body {
+  padding: 24px;
+}
+
+.ef-fmodal-desc {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.ef-fmodal-spec {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 22px;
+}
+
+.ef-fmodal-spec h4 {
+  font-size: 13px;
+  font-weight: 750;
+  color: #334155;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ef-fmodal-spec ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.ef-fmodal-footer {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .ef-header {
+    height: auto !important;
+    padding: 12px 16px !important;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ef-main-nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+  }
+  .ef-hero-card {
+    padding: 30px 22px;
+  }
+  .ef-hero-title {
+    font-size: 24px;
+  }
+}
