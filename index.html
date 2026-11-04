@@ -118,7 +118,28 @@
 <div class="drop-main"><span class="drop-ico">↧</span><span><strong>Thả file Excel cần nhập</strong><small>Giữ nguyên file gốc và công thức</small></span></div>
 <input accept=".xlsx,.xlsm" aria-label="Chọn file Excel đích" id="targetFile" type="file"/><div aria-live="polite" class="filename" id="dstName">Chưa chọn file</div>
 </div>
-  <div class="ef-sheets"><div class="twocol" style="margin-top:14px"><div class="field"><label for="sourceSheet">Sheet của file nguồn đầu tiên (làm mẫu cột)</label><select id="sourceSheet"><option>Chọn file nguồn trước</option></select></div><div class="field"><label for="targetSheet">Sheet cần điền</label><select id="targetSheet"><option>Chọn file đích trước</option></select></div></div></div>
+  <div class="ef-sheets">
+    <div class="ef-sheets-grid">
+      <div class="field">
+        <label for="sourceSheet">Sheet nguồn (mẫu cột)</label>
+        <select id="sourceSheet"><option>Chọn file nguồn trước</option></select>
+        <div class="ef-header-row-bar">
+          <label for="headerRow">Dòng tiêu đề:</label>
+          <input id="headerRow" min="1" type="number" value="1" title="Dòng chứa tên các cột trong file nguồn"/>
+          <span class="ef-detect-tag" id="sourceHeaderTag" style="display:none">Tự nhận diện dòng 1</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="targetSheet">Sheet đích cần điền</label>
+        <select id="targetSheet"><option>Chọn file đích trước</option></select>
+        <div class="ef-header-row-bar">
+          <label for="targetHeaderRow">Dòng tiêu đề:</label>
+          <input id="targetHeaderRow" min="1" type="number" value="1" title="Dòng chứa tên các cột trong file đích"/>
+          <span class="ef-detect-tag" id="targetHeaderTag" style="display:none">Tự nhận diện dòng 7</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 <section class="ef-card ef-mapping" id="efMapping">
   <div class="ef-mapping-head"><div class="ef-card-heading"><span class="ef-icon">↔</span><h2>Ghép cột</h2></div>
@@ -196,8 +217,8 @@ M -&gt; F" spellcheck="false"></textarea></div></div></details>
 </section>
 <details class="ef-settings"><summary><span class="ef-settings-icon">⚙</span> Cài đặt nhập liệu nâng cao <small>Đối chiếu theo mã, dòng nhập, định dạng và vùng dữ liệu</small></summary>
 <div class="ef-settings-grid">
-  <div class="ef-settings-group"><h3>Vùng dữ liệu & vị trí nhập</h3><label class="checkline multi-range-option"><input checked="" id="autoSourceRange" type="checkbox"/><span><b>Tự tìm vùng giao dịch riêng trong từng file</b><span class="muted" style="display:block;font-size:12px">Khuyên dùng cho sao kê các tháng có số dòng khác nhau.</span></span></label><div class="twocol" style="margin-top:14px;align-items:start"><div class="field"><label for="targetMode">Ứng dụng tìm vị trí nhập thế nào?</label><select id="targetMode"><option value="auto">✨ Tự tìm dòng trống phù hợp (khuyên dùng)</option><option value="manual">Tôi sẽ chỉ dòng bắt đầu</option></select></div><div class="field" id="manualTargetField" style="display:none"><label for="targetStart">Dòng bắt đầu của file đích</label><input id="targetStart" min="1" type="number" value="2"/></div></div><details class="adv-details" id="rangeDetails"><summary>⚙ Chỉnh vùng dữ liệu (chỉ cần khi ứng dụng nhận diện chưa đúng)</summary><div class="adv-body">
-<div class="twocol"><div class="field"><label for="headerRow">Dòng tiêu đề file nguồn</label><input id="headerRow" min="1" type="number" value="1"/><p class="helper">Là dòng chứa tên cột, ví dụ STT, Ngày giao dịch.</p></div><div class="field"><label for="targetHeaderRow">Dòng tiêu đề file cần điền</label><input id="targetHeaderRow" min="1" type="number" value="1"/><p class="helper">Nếu file đích bắt đầu tên cột ở dòng 5, chọn 5.</p></div><div class="field"><label for="sourceStart">Dòng giao dịch đầu tiên</label><input id="sourceStart" min="1" type="number" value="2"/></div><div class="field"><label for="sourceEnd">Dòng giao dịch cuối cùng</label><input id="sourceEnd" min="1" placeholder="Tự lấy đến cuối sheet" type="number"/></div></div>
+  <div class="ef-settings-group"><h3>Vùng dữ liệu & vị trí nhập</h3><label class="checkline multi-range-option"><input checked="" id="autoSourceRange" type="checkbox"/><span><b>Tự tìm vùng giao dịch riêng trong từng file</b><span class="muted" style="display:block;font-size:12px">Khuyên dùng cho sao kê các tháng có số dòng khác nhau.</span></span></label><div class="twocol" style="margin-top:14px;align-items:start"><div class="field"><label for="targetMode">Ứng dụng tìm vị trí nhập thế nào?</label><select id="targetMode"><option value="auto">✨ Tự tìm dòng trống phù hợp (khuyên dùng)</option><option value="manual">Tôi sẽ chỉ dòng bắt đầu</option></select></div><div class="field" id="manualTargetField" style="display:none"><label for="targetStart">Dòng bắt đầu của file đích</label><input id="targetStart" min="1" type="number" value="2"/></div></div><details class="adv-details" id="rangeDetails"><summary>⚙ Chỉnh vùng dữ liệu dòng bắt đầu / dòng kết thúc</summary><div class="adv-body">
+<div class="twocol"><div class="field"><label for="sourceStart">Dòng giao dịch đầu tiên (nguồn)</label><input id="sourceStart" min="1" type="number" value="2"/><p class="helper">Dòng bắt đầu đọc các giao dịch.</p></div><div class="field"><label for="sourceEnd">Dòng giao dịch cuối cùng (nguồn)</label><input id="sourceEnd" min="1" placeholder="Tự lấy đến cuối sheet" type="number"/><p class="helper">Để trống nếu muốn tự lấy đến hết bảng.</p></div></div>
 <button class="btn" id="detectRange" style="margin-top:11px" type="button">⌕ Tự tìm lại vùng giao dịch</button>
 </div></details><div aria-live="polite" class="smart-info neutral" id="sourceInsight">Sau khi chọn các sao kê, ứng dụng sẽ tự tìm các giao dịch và ô gộp của từng file.</div><div aria-label="Xem mẫu giao dịch từ file nguồn" class="mini-sample" id="sourcePeek" style="display:none"></div></div>
   <div class="ef-settings-group"><h3>Quy tắc & định dạng</h3><div class="field" style="margin-top:14px"><label for="rowFilter">Chọn những dòng nào được ghi ở file đích</label><select id="rowFilter"><option value="all">Mọi dòng hợp lệ</option><option value="withFormula">Chỉ dòng đang có công thức (không ghi đè ô công thức)</option><option value="withoutFormula">Chỉ dòng không có công thức</option></select></div><label class="checkline"><input type="checkbox" id="skipEmpty" checked> Bỏ dòng trống</label><button class="btn bank-btn" id="bankPreset" type="button">↕ Áp dụng cài đặt nhanh cho sao kê ngân hàng</button><details class="adv-details"><summary>⚙ Các tùy chọn khác (ghép bằng mã, dữ liệu trống, định dạng vùng)</summary><div class="adv-body">

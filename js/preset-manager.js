@@ -11,12 +11,22 @@
   const PRESETS_STORAGE_KEY = 'excelflow_presets_v2';
   const MEMORY_STORAGE_KEY = 'excelflow_column_memory_v2';
 
-  // Danh sách từ khóa ngân hàng phổ biến để auto-seed gợi ý ghép cột
+  // Danh sách từ khóa ngân hàng & hóa đơn thuế phổ biến để auto-seed gợi ý ghép cột
   const BUILTIN_MAPPINGS = [
+    // Bảng kê thuế GTGT (01-1 bán ra, 01-2 mua vào) & Sổ BKMV / BKBR
+    { src: ['ký hiệu hóa đơn', 'ky hieu hoa don', 'ký hiệu hd', 'ky hieu hd', 'ký hiệu', 'serial', 'seri'], dst: ['Serial', 'Ký hiệu hóa đơn', 'Ký hiệu HĐ'], type: 'text' },
+    { src: ['số hoá đơn', 'số hóa đơn', 'so hoa don', 'số hđ', 'so hd', 'số', 'so', 'inv no', 'invoice no'], dst: ['Số', 'Số hoá đơn', 'Số hóa đơn', 'Số HĐ'], type: 'text' },
+    { src: ['ngày phát hành', 'ngay phat hanh', 'ngày lập', 'ngay lap', 'ngày hđ', 'ngày hóa đơn', 'ngay hd', 'ngay hoa don', 'inv date', 'invoice date'], dst: ['Ngày', 'Ngày hóa đơn', 'Ngày phát hành', 'Ngày CT (*)'], type: 'date' },
+    { src: ['tên người bán', 'ten nguoi ban', 'người bán', 'tên người mua', 'ten nguoi mua', 'người mua', 'tên khách hàng', 'ten khach hang', 'khách hàng', 'khach hang'], dst: ['Tên khách hàng', 'Tên người bán', 'Tên người mua', 'Khách hàng', 'Mã đối tượng (*)'], type: 'text' },
+    { src: ['mã số thuế người bán', 'ma so thue nguoi ban', 'mã số thuế người mua', 'ma so thue nguoi mua', 'mã số thuế', 'ma so thue', 'mst', 'mst người bán', 'mst người mua'], dst: ['MST', 'Mã số thuế', 'Mã số thuế người bán', 'Mã số thuế người mua'], type: 'text' },
+    { src: ['tiền chưa thuế', 'tien chua thue', 'doanh số bán chưa có thuế', 'doanh số', 'tiền hàng', 'tien hang'], dst: ['Tiền hàng', 'Tiền (*)', 'Doanh số bán chưa có thuế', 'Tiền chưa thuế'], type: 'money' },
+    { src: ['thuế gtgt', 'thue gtgt', 'tiền thuế gtgt', 'thuế', 'thue'], dst: ['Thuế', 'Thuế GTGT', 'Tiền thuế'], type: 'money' },
+    { src: ['tổng tiền hàng', 'tong tien hang', 'tổng thanh toán', 'tong thanh toan', 'tổng tiền', 'tong tien'], dst: ['Tổng tiền hàng', 'Tổng tiền', 'Tổng thanh toán'], type: 'money' },
+
+    // Sao kê ngân hàng phổ biến
     { src: ['stt', 'số thứ tự', 'so thu tu', 'no', 'order'], dst: 'Số chứng từ (*)', type: 'text' },
     { src: ['số ct', 'số chứng từ', 'so ct', 'so chung tu', 'mã gd', 'mã giao dịch', 'ma gd', 'số tham chiếu', 'ref no', 'trans no'], dst: 'Số chứng từ (*)', type: 'text' },
     { src: ['ngày', 'ngày gd', 'ngày giao dịch', 'ngay gd', 'ngay giao dich', 'ngày ct', 'ngày chứng từ', 'ngay ct', 'date', 'trans date'], dst: 'Ngày CT (*)', type: 'date' },
-    { src: ['ngày hđ', 'ngày hóa đơn', 'ngay hd', 'ngay hoa don', 'inv date', 'invoice date'], dst: 'Ngày hóa đơn', type: 'date' },
     { src: ['tiền', 'số tiền', 'so tien', 'phát sinh', 'phát sinh có', 'ghi có', 'credit', 'amount', 'tiền (*)', 'số tiền gd', 'tiền gd'], dst: 'Tiền (*)', type: 'money' },
     { src: ['số tiền ghi nợ', 'ghi nợ', 'debit'], dst: 'Tiền (*)', type: 'money' },
     { src: ['diễn giải', 'dien giai', 'nội dung', 'noi dung', 'nội dung gd', 'nội dung giao dịch', 'ghi chú', 'description', 'remarks'], dst: 'Diễn giải', type: 'text' },
@@ -71,6 +81,17 @@
     if (existing.length > 0) return;
 
     const defaults = [
+      {
+        id: 'preset_tax_invoice_default',
+        name: 'Tờ khai Thuế GTGT (PDF) → Bảng kê Mua vào BKMV',
+        description: 'Mẫu chuẩn trích xuất PDF Tờ khai thuế GTGT (01-2) điền vào Sổ BKMV (Serial, Số, Ngày, Tên KH, MST, Tiền hàng, Thuế)',
+        updatedAt: Date.now(),
+        mapping: 'C -> A\nD -> B\nE -> C\nF -> D\nG -> E\nI -> F\nK -> G',
+        formats: 'C -> date\nF -> money\nG -> money',
+        reverse: false,
+        skipTotals: true,
+        skipZeros: true
+      },
       {
         id: 'preset_vcb_default',
         name: 'Sao kê Vietcombank → Báo có Freebird',
@@ -199,12 +220,23 @@
         matchedDst = dstOptions.find(d => !usedDst.has(d.value) && cleanHeader(d.textContent) === sName);
       }
 
-      // 3. Khớp theo danh sách từ khóa ngân hàng chuẩn
+      // 3. Khớp theo danh sách từ khóa ngân hàng & hóa đơn thuế chuẩn
       if (!matchedDst) {
         for (const rule of BUILTIN_MAPPINGS) {
           const matchSrc = rule.src.some(term => sName.includes(term) || term.includes(sName));
           if (matchSrc) {
-            matchedDst = dstOptions.find(d => !usedDst.has(d.value) && cleanHeader(d.textContent).includes(rule.dst.toLowerCase()));
+            matchedDst = dstOptions.find(d => {
+              if (usedDst.has(d.value)) return false;
+              const dstClean = cleanHeader(d.textContent);
+              if (Array.isArray(rule.dst)) {
+                return rule.dst.some(target => {
+                  const tClean = cleanHeader(target);
+                  return dstClean === tClean || dstClean.includes(tClean) || tClean.includes(dstClean);
+                });
+              }
+              const tClean = cleanHeader(rule.dst);
+              return dstClean === tClean || dstClean.includes(tClean) || tClean.includes(dstClean);
+            });
             if (matchedDst) {
               matchedType = rule.type;
               break;

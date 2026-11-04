@@ -383,11 +383,61 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
   margin-top: 14px !important;
 }
 
-.ef-sheets .twocol {
+.ef-sheets .twocol,
+.ef-sheets-grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: 12px !important;
-  align-items: end !important; /* Đảm bảo 2 ô select luôn thẳng hàng ngang */
+  align-items: start !important;
+}
+
+.ef-header-row-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 7px !important;
+  flex-wrap: wrap !important;
+  background: #f8fafc !important;
+  padding: 5px 8px !important;
+  border-radius: 6px !important;
+  border: 1px dashed #cbd5e1 !important;
+}
+
+.ef-header-row-bar label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  min-height: unset !important;
+}
+
+.ef-header-row-bar input[type="number"] {
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 28px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  color: #0f172a !important;
+  background: #ffffff !important;
+  border: 1px solid #94a3b8 !important;
+  border-radius: 5px !important;
+}
+
+.ef-detect-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 2px 7px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  color: #047857 !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
 }
 
 .ef-sheets .field {
@@ -783,9 +833,14 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
     display: none !important;
   }
 
-  .ef-sheets .twocol {
+  .ef-sheets .twocol,
+  .ef-sheets-grid {
     grid-template-columns: 1fr !important;
-    gap: 8px !important;
+    gap: 10px !important;
+  }
+
+  .ef-header-row-bar {
+    justify-content: flex-start !important;
   }
 
   .ef-preset-bar {
