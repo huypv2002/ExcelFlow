@@ -351,3 +351,74 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 .ef-preview-tools #efOpenPreviewExpand:hover{background:#f2f6fa!important;border-color:#bfcbd9!important}
 .ef-preview-tools #efOpenPreviewExpand:focus-visible{outline:2px solid #10917b!important;outline-offset:2px}
 @media(max-width:640px){.ef-preview-tools{width:auto!important;margin-left:auto!important}.ef-preview-tools #efOpenPreviewExpand{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}}
+
+/* ==========================================================================
+   Fix UI: Loại bỏ Double Frame và Khắc phục lệch hàng 2 ô chọn Sheet
+   ========================================================================== */
+
+/* 1. Loại bỏ Double Frame ở khung ghép cột */
+#mappingList {
+  border: 1.5px solid #dbe5ef !important;
+  border-radius: 0 0 10px 10px !important;
+  background: #ffffff !important;
+}
+
+#mappingList .mapping-empty,
+.ef-mapping .mapping-empty,
+.mapping-empty {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 55px 16px !important;
+  text-align: center !important;
+  color: #7b8e9f !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+/* 2. Khắc phục lệch hàng 2 ô chọn Sheet (nguồn và đích) */
+.ef-sheets {
+  margin-top: 14px !important;
+}
+
+.ef-sheets .twocol {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+  align-items: end !important; /* Đảm bảo 2 ô select luôn thẳng hàng ngang */
+}
+
+.ef-sheets .field {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+}
+
+.ef-sheets .field label {
+  font-size: 11.5px !important;
+  color: #4a5d74 !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  min-height: 32px !important; /* Chiều cao đồng đều 2 dòng cho cả 2 nhãn */
+  margin: 0 0 6px !important;
+  line-height: 1.35 !important;
+}
+
+.ef-sheets .field select {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  border: 1.5px solid #d4e0ec !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  box-sizing: border-box !important;
+}
+
