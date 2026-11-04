@@ -14,6 +14,8 @@
   let currentPage = 1;
   const rowsPerPage = 50;
   let searchFilter = '';
+  let isEditMode = false;
+  let selectedRowIndex = -1;
 
   const el = id => document.getElementById(id);
 
@@ -421,9 +423,19 @@
           const bytes = await fileObj.file.arrayBuffer();
           const doc = await PDFLib.PDFDocument.load(bytes);
           const count = doc.getPageCount();
-          const copied = await mergedPdf.copyPages(doc, doc.getPageIndices());
+
+          // Yêu cầu: Nếu là file PDF tờ khai thuế GTGT thì tự động loại bỏ trang đầu tiên
+          let isTaxDeclaration = false;
+          if (fileObj.sheets && fileObj.sheets.some(s => /mua\s*v[aà]o|b[aá]n\s*ra|01-1|01-2/i.test(s.name))) {
+            isTaxDeclaration = true;
+          }
+          const startIdx = (isTaxDeclaration && count > 1) ? 1 : 0;
+          const pageIndices = [];
+          for (let p = startIdx; p < count; p++) pageIndices.push(p);
+
+          const copied = await mergedPdf.copyPages(doc, pageIndices);
           copied.forEach(page => mergedPdf.addPage(page));
-          totalPages += count;
+          totalPages += pageIndices.length;
         }
 
         const mergedBytes = await mergedPdf.save();
@@ -632,9 +644,19 @@
     const summaryEl = el('mergerResultSummary');
     const downloadBtn = el('mergerDownloadBtn');
     const sendBtn = el('mergerSendToImportBtn');
+    const editBtn = el('mergerEditBtn');
+    const editToolbar = el('mergerEditToolbar');
     const tableContainer = el('mergerTableContainer');
     const pdfPreview = el('mergerPdfPreview');
     const sheetTabs = el('mergerSheetTabs');
+
+    isEditMode = false;
+    selectedRowIndex = -1;
+    if (editBtn) {
+      editBtn.textContent = '✎ Chỉnh sửa dữ liệu';
+      editBtn.className = 'btn outline';
+    }
+    if (editToolbar) editToolbar.style.display = 'none';
 
     if (mergedResult.type === 'pdf') {
       if (titleEl) titleEl.textContent = mergedResult.filename;
@@ -647,6 +669,7 @@
         downloadBtn.textContent = '⇩ Tải file PDF (.pdf)';
         downloadBtn.style.display = 'inline-flex';
       }
+      if (editBtn) editBtn.style.display = 'none';
       if (sendBtn) sendBtn.style.display = 'none';
       if (tableContainer) tableContainer.style.display = 'none';
       if (sheetTabs) sheetTabs.style.display = 'none';
@@ -668,6 +691,7 @@
         downloadBtn.textContent = '⇩ Tải file Excel (.xlsx)';
         downloadBtn.style.display = 'inline-flex';
       }
+      if (editBtn) editBtn.style.display = 'inline-flex';
       if (sendBtn) sendBtn.style.display = 'inline-flex';
       if (pdfPreview) pdfPreview.style.display = 'none';
       if (tableContainer) tableContainer.style.display = 'block';
@@ -683,6 +707,72 @@
     }
 
     card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Tái tạo lại blob .xlsx sau khi người dùng sửa trực tiếp
+  async function regenerateXlsxBlob() {
+    if (!mergedResult || mergedResult.type !== 'xlsx') return;
+    const zipGenerator = window.efSheetsToXlsxZip;
+    if (!zipGenerator) return;
+    const zip = zipGenerator(mergedResult.sheets);
+    const xlsxBytes = await zip.generateAsync({ type: 'uint8array' });
+    mergedResult.blob = new Blob([xlsxBytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+
+  // Bật/tắt chế độ sửa trực tiếp
+  function toggleEditMode() {
+    isEditMode = !isEditMode;
+    selectedRowIndex = -1;
+    const editBtn = el('mergerEditBtn');
+    const toolbar = el('mergerEditToolbar');
+
+    if (isEditMode) {
+      if (editBtn) {
+        editBtn.textContent = '✓ Hoàn tất chỉnh sửa';
+        editBtn.className = 'btn teal is-editing';
+      }
+      if (toolbar) toolbar.style.display = 'flex';
+      showToast('Đã bật chế độ sửa: Bạn có thể bấm trực tiếp vào bất kỳ ô nào để sửa số liệu.');
+    } else {
+      if (editBtn) {
+        editBtn.textContent = '✎ Chỉnh sửa dữ liệu';
+        editBtn.className = 'btn outline';
+      }
+      if (toolbar) toolbar.style.display = 'none';
+      showToast('Đã lưu các sửa đổi vào bảng.');
+    }
+    renderActiveTable();
+  }
+
+  // Thêm 1 dòng mới vào sheet hiện tại
+  function addRow() {
+    const currentSheet = mergedResult?.sheets[activeSheetIndex];
+    if (!currentSheet) return;
+    const headerRow = currentSheet.grid[0] || [];
+    const newRow = new Array(headerRow.length).fill('');
+    if (selectedRowIndex > 0 && selectedRowIndex < currentSheet.grid.length) {
+      currentSheet.grid.splice(selectedRowIndex + 1, 0, newRow);
+      selectedRowIndex++;
+    } else {
+      currentSheet.grid.push(newRow);
+      selectedRowIndex = currentSheet.grid.length - 1;
+    }
+    renderActiveTable();
+    showToast('✓ Đã thêm 1 dòng mới vào bảng.');
+  }
+
+  // Xóa dòng đang chọn
+  function deleteSelectedRow() {
+    const currentSheet = mergedResult?.sheets[activeSheetIndex];
+    if (!currentSheet) return;
+    if (selectedRowIndex <= 0 || selectedRowIndex >= currentSheet.grid.length) {
+      showToast('Hãy bấm chọn một dòng trong bảng trước khi xóa.');
+      return;
+    }
+    currentSheet.grid.splice(selectedRowIndex, 1);
+    selectedRowIndex = -1;
+    renderActiveTable();
+    showToast('✓ Đã xóa dòng đã chọn.');
   }
 
   // Render các tab sheet
@@ -707,6 +797,7 @@
       btn.addEventListener('click', () => {
         activeSheetIndex = idx;
         currentPage = 1;
+        selectedRowIndex = -1;
         renderSheetTabs();
         renderActiveTable();
       });
@@ -761,10 +852,16 @@
     } else {
       pageRows.forEach((row, rIdx) => {
         const absRowIdx = startIdx + rIdx + 1;
-        tableHtml += `<tr><td style="text-align: center; color: #94a3b8; font-weight: 600;">${absRowIdx}</td>`;
+        const isSel = isEditMode && (absRowIdx === selectedRowIndex);
+        tableHtml += `<tr data-row="${absRowIdx}" class="${isSel ? 'is-selected' : ''}">`;
+        tableHtml += `<td style="text-align: center; color: #94a3b8; font-weight: 600;">${absRowIdx}</td>`;
         for (let c = 0; c < headerRow.length; c++) {
           const val = row[c] ?? '';
-          tableHtml += `<td>${esc(val)}</td>`;
+          if (isEditMode) {
+            tableHtml += `<td contenteditable="true" data-row="${absRowIdx}" data-col="${c}" title="Bấm để chỉnh sửa">${esc(val)}</td>`;
+          } else {
+            tableHtml += `<td>${esc(val)}</td>`;
+          }
         }
         tableHtml += '</tr>';
       });
@@ -772,6 +869,27 @@
 
     tableHtml += '</tbody></table>';
     tableArea.innerHTML = tableHtml;
+
+    // Gắn sự kiện sửa ô trực tiếp khi bật chế độ sửa
+    if (isEditMode) {
+      tableArea.querySelectorAll('td[contenteditable="true"]').forEach(td => {
+        td.addEventListener('blur', () => {
+          const r = Number(td.dataset.row);
+          const c = Number(td.dataset.col);
+          if (currentSheet.grid[r]) {
+            currentSheet.grid[r][c] = td.textContent.trim();
+          }
+        });
+      });
+
+      tableArea.querySelectorAll('tbody tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+          tableArea.querySelectorAll('tbody tr').forEach(t => t.classList.remove('is-selected'));
+          tr.classList.add('is-selected');
+          selectedRowIndex = Number(tr.dataset.row);
+        });
+      });
+    }
 
     // Cập nhật phân trang
     const pageNumEl = el('mergerPageNumber');
@@ -792,6 +910,9 @@
     const processBtn = el('mergerProcessBtn');
     const downloadBtn = el('mergerDownloadBtn');
     const sendBtn = el('mergerSendToImportBtn');
+    const editBtn = el('mergerEditBtn');
+    const addRowBtn = el('mergerAddRowBtn');
+    const delRowBtn = el('mergerDeleteRowBtn');
     const resetBtn = el('mergerResetBtn');
     const searchInput = el('mergerSearchInput');
     const prevBtn = el('mergerPrevPage');
@@ -839,6 +960,7 @@
       clearAllBtn.addEventListener('click', () => {
         mergerFiles = [];
         mergedResult = null;
+        isEditMode = false;
         renderFileList();
         const resCard = el('mergerResultCard');
         if (resCard) resCard.style.display = 'none';
@@ -850,9 +972,24 @@
       processBtn.addEventListener('click', executeMerge);
     }
 
+    if (editBtn) {
+      editBtn.addEventListener('click', toggleEditMode);
+    }
+
+    if (addRowBtn) {
+      addRowBtn.addEventListener('click', addRow);
+    }
+
+    if (delRowBtn) {
+      delRowBtn.addEventListener('click', deleteSelectedRow);
+    }
+
     if (downloadBtn) {
-      downloadBtn.addEventListener('click', () => {
+      downloadBtn.addEventListener('click', async () => {
         if (!mergedResult || !mergedResult.blob) return;
+        if (mergedResult.type === 'xlsx') {
+          await regenerateXlsxBlob();
+        }
         if (typeof window.efDownload === 'function') {
           window.efDownload(mergedResult.blob, mergedResult.filename);
         } else {
@@ -874,6 +1011,7 @@
           return;
         }
         try {
+          await regenerateXlsxBlob();
           const virtualFile = new File([mergedResult.blob], mergedResult.filename, {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             lastModified: Date.now()
@@ -898,6 +1036,7 @@
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
         mergedResult = null;
+        isEditMode = false;
         const resCard = el('mergerResultCard');
         if (resCard) resCard.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });

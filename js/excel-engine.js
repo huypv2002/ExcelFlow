@@ -230,7 +230,7 @@
   }
 
   // Nhận diện tệp Tờ khai thuế GTGT có bảng kê bán ra (01-1) và mua vào (01-2)
-  const hasTaxHeaders = /01-1\/GTGT|01-2\/GTGT|BẢNG KÊ HOÁ ĐƠN|BÁN RA|MUA VÀO/i.test(fullPdfText);
+  const hasTaxHeaders = /01-1\/GTGT|01-2\/GTGT|BẢNG KÊ HOÁ ĐƠN|BÁN RA|MUA VÀO|TỜ KHAI THUẾ GIÁ TRỊ GIA TĂNG|01\/GTGT/i.test(fullPdfText);
 
   if (hasTaxHeaders) {
     const sheetsResult = [];
@@ -239,10 +239,10 @@
 
     let currentSection = null;
     for (const pd of pagesData) {
+      // Yêu cầu: Luôn loại bỏ trang đầu tiên của các file PDF tờ khai thuế GTGT
+      if (pd.p === 1) continue;
+
       const pageTxt = pd.items.map(i => i.str).join(' ');
-      // Trang 1 thường là Tờ khai chính (Mẫu 01/GTGT) không chứa bảng kê hoá đơn chi tiết -> bỏ qua trang tờ khai
-      const isMainDeclarationPage = /TỜ KHAI THUẾ GIÁ TRỊ GIA TĂNG/i.test(pageTxt) && !/BẢNG KÊ HOÁ ĐƠN/i.test(pageTxt);
-      if (isMainDeclarationPage) continue;
 
       if (/01-2\/GTGT|HÀNG HOÁ.*?MUA VÀO|BẢNG KÊ.*?MUA VÀO/i.test(pageTxt)) {
         currentSection = 'muavao';

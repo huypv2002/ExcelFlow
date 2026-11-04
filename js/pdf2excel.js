@@ -15,6 +15,8 @@
   let currentFilter = '';
   let currentPage = 0;
   const PAGE_SIZE = 50;
+  let isEditMode = false;
+  let selectedRowIdx = -1;
 
   function init() {
     const dropZone = $('pdf2ExcelDrop');
@@ -62,6 +64,9 @@
     $('pdf2ExcelDownloadBtn')?.addEventListener('click', downloadConvertedExcel);
     $('pdf2ExcelSendToImportBtn')?.addEventListener('click', sendToImportWorkspace);
     $('pdf2ExcelResetBtn')?.addEventListener('click', resetView);
+    $('pdf2ExcelEditBtn')?.addEventListener('click', toggleEditMode);
+    $('pdf2ExcelAddRowBtn')?.addEventListener('click', addRow);
+    $('pdf2ExcelDeleteRowBtn')?.addEventListener('click', deleteSelectedRow);
 
     // Search filter
     $('pdf2ExcelSearchInput')?.addEventListener('input', e => {
@@ -197,6 +202,64 @@
     return Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   }
 
+  function toggleEditMode() {
+    isEditMode = !isEditMode;
+    selectedRowIdx = -1;
+    const btn = $('pdf2ExcelEditBtn');
+    const toolbar = $('pdf2ExcelEditToolbar');
+
+    if (isEditMode) {
+      if (btn) {
+        btn.textContent = '✓ Hoàn tất chỉnh sửa';
+        btn.className = 'btn teal is-editing';
+      }
+      if (toolbar) toolbar.style.display = 'flex';
+      if (typeof window.efToast === 'function') {
+        window.efToast('Đã bật chế độ sửa: Bạn có thể bấm trực tiếp vào ô để sửa nội dung.');
+      }
+    } else {
+      if (btn) {
+        btn.textContent = '✎ Chỉnh sửa dữ liệu';
+        btn.className = 'btn outline';
+      }
+      if (toolbar) toolbar.style.display = 'none';
+      if (typeof window.efToast === 'function') {
+        window.efToast('Đã lưu các sửa đổi vào bảng.');
+      }
+    }
+    renderCurrentSheetTable();
+  }
+
+  function addRow() {
+    const sheet = currentSheets[currentSheetIdx];
+    if (!sheet) return;
+    const header = sheet.grid[0] || [];
+    const newRow = new Array(header.length).fill('');
+    if (selectedRowIdx > 0 && selectedRowIdx < sheet.grid.length) {
+      sheet.grid.splice(selectedRowIdx + 1, 0, newRow);
+      selectedRowIdx++;
+    } else {
+      sheet.grid.push(newRow);
+      selectedRowIdx = sheet.grid.length - 1;
+    }
+    renderCurrentSheetTable();
+    if (typeof window.efToast === 'function') window.efToast('✓ Đã thêm 1 dòng mới vào bảng.');
+  }
+
+  function deleteSelectedRow() {
+    const sheet = currentSheets[currentSheetIdx];
+    if (!sheet) return;
+    if (selectedRowIdx <= 0 || selectedRowIdx >= sheet.grid.length) {
+      if (typeof window.efToast === 'function') window.efToast('Hãy bấm chọn một dòng trong bảng trước khi xóa.');
+      else alert('Hãy bấm chọn một dòng trong bảng trước khi xóa.');
+      return;
+    }
+    sheet.grid.splice(selectedRowIdx, 1);
+    selectedRowIdx = -1;
+    renderCurrentSheetTable();
+    if (typeof window.efToast === 'function') window.efToast('✓ Đã xóa dòng được chọn.');
+  }
+
   function renderCurrentSheetTable() {
     const sheet = currentSheets[currentSheetIdx];
     if (!sheet) return;
@@ -236,21 +299,55 @@
 
     const thead = '<thead><tr><th style="width:50px">#</th>' + header.map((h, i) => '<th>' + esc(h || 'Cột ' + (i + 1)) + '</th>').join('') + '</tr></thead>';
     const tbody = '<tbody>' + pageRows.map((r, rIdx) => {
-      const rowNum = startIdx + rIdx + 1;
-      const cells = header.map((_, cIdx) => '<td>' + esc(r[cIdx] || '') + '</td>').join('');
-      return '<tr><th style="color:#64748b">' + rowNum + '</th>' + cells + '</tr>';
+      const absRowIdx = startIdx + rIdx + 1;
+      const isSel = isEditMode && (absRowIdx === selectedRowIdx);
+      const cells = header.map((_, cIdx) => {
+        const val = esc(r[cIdx] || '');
+        if (isEditMode) {
+          return `<td contenteditable="true" data-row="${absRowIdx}" data-col="${cIdx}" title="Bấm để chỉnh sửa">${val}</td>`;
+        }
+        return `<td>${val}</td>`;
+      }).join('');
+      return `<tr data-row="${absRowIdx}" class="${isSel ? 'is-selected' : ''}"><th style="color:#64748b">${absRowIdx}</th>${cells}</tr>`;
     }).join('') + '</tbody>';
 
     tableArea.innerHTML = '<table class="data-table">' + thead + tbody + '</table>';
+
+    if (isEditMode) {
+      tableArea.querySelectorAll('td[contenteditable="true"]').forEach(td => {
+        td.addEventListener('blur', () => {
+          const r = Number(td.dataset.row);
+          const c = Number(td.dataset.col);
+          if (sheet.grid[r]) {
+            sheet.grid[r][c] = td.textContent.trim();
+          }
+        });
+      });
+
+      tableArea.querySelectorAll('tbody tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+          tableArea.querySelectorAll('tbody tr').forEach(t => t.classList.remove('is-selected'));
+          tr.classList.add('is-selected');
+          selectedRowIdx = Number(tr.dataset.row);
+        });
+      });
+    }
+  }
+
+  async function generateCurrentBlob() {
+    if (!currentSheets.length) return null;
+    const zipGen = window.efSheetsToXlsxZip;
+    const zip = zipGen ? zipGen(currentSheets) : currentZip;
+    return await zip.generateAsync({
+      type: 'blob',
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
   }
 
   async function downloadConvertedExcel() {
-    if (!currentZip || !currentFile) return;
+    if (!currentFile || !currentSheets.length) return;
     try {
-      const blob = await currentZip.generateAsync({
-        type: 'blob',
-        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+      const blob = await generateCurrentBlob();
       const outName = currentFile.name.replace(/\.pdf$/i, '') + '.xlsx';
       if (typeof window.efDownload === 'function') {
         window.efDownload(blob, outName);
@@ -264,19 +361,16 @@
   }
 
   async function sendToImportWorkspace() {
-    if (!currentZip || !currentFile) return;
+    if (!currentFile || !currentSheets.length) return;
     try {
-      const blob = await currentZip.generateAsync({
-        type: 'blob',
-        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
+      const blob = await generateCurrentBlob();
       const excelName = currentFile.name.replace(/\.pdf$/i, '') + '.xlsx';
       const excelFile = new File([blob], excelName, {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
 
       if (typeof window.efAddSourceFiles === 'function') {
-        window.efAddSourceFiles([excelFile]);
+        await window.efAddSourceFiles([excelFile]);
       }
       if (typeof window.efGoPage === 'function') {
         window.efGoPage('import');
@@ -296,6 +390,8 @@
     currentSheetIdx = 0;
     currentFilter = '';
     currentPage = 0;
+    isEditMode = false;
+    selectedRowIdx = -1;
 
     const fileInput = $('pdf2ExcelFileInput');
     if (fileInput) fileInput.value = '';

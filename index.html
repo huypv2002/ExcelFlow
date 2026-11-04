@@ -248,9 +248,19 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
           <p class="helper" id="pdf2ExcelDocSubtitle">Đã trích xuất thành công</p>
         </div>
         <div class="pdf2excel-btn-bar">
+          <button type="button" class="btn outline" id="pdf2ExcelEditBtn">✎ Chỉnh sửa dữ liệu</button>
           <button type="button" class="btn teal primary-action" id="pdf2ExcelDownloadBtn">⇩ Tải file Excel (.xlsx)</button>
           <button type="button" class="btn" id="pdf2ExcelSendToImportBtn" title="Chuyển file này sang màn hình Ghép & Nhập liệu">⇄ Đưa vào Ghép &amp; Nhập liệu</button>
           <button type="button" class="btn outline" id="pdf2ExcelResetBtn">✕ Chọn file khác</button>
+        </div>
+      </div>
+
+      <!-- Thanh công cụ chỉnh sửa trực tiếp -->
+      <div class="merger-edit-toolbar" id="pdf2ExcelEditToolbar" style="display:none">
+        <span class="merger-edit-tip">✎ Đang bật chế độ chỉnh sửa: Bấm trực tiếp vào ô bất kỳ để sửa nội dung</span>
+        <div class="merger-edit-actions">
+          <button type="button" class="btn small" id="pdf2ExcelAddRowBtn">+ Thêm dòng mới</button>
+          <button type="button" class="btn small outline danger" id="pdf2ExcelDeleteRowBtn">✕ Xóa dòng chọn</button>
         </div>
       </div>
 
@@ -376,9 +386,19 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
           <p class="helper" id="mergerResultSummary">Đã gộp thành công</p>
         </div>
         <div class="merger-result-btns">
+          <button type="button" class="btn outline" id="mergerEditBtn">✎ Chỉnh sửa dữ liệu</button>
           <button type="button" class="btn teal primary-action" id="mergerDownloadBtn">⇩ Tải file gộp (.xlsx)</button>
           <button type="button" class="btn primary" id="mergerSendToImportBtn" title="Chuyển file gộp này sang làm file nguồn cho Ghép & Nhập liệu">⇄ Đưa sang Ghép &amp; Nhập liệu</button>
           <button type="button" class="btn outline" id="mergerResetBtn">✕ Làm mới</button>
+        </div>
+      </div>
+
+      <!-- Thanh công cụ chỉnh sửa trực tiếp -->
+      <div class="merger-edit-toolbar" id="mergerEditToolbar" style="display:none">
+        <span class="merger-edit-tip">✎ Đang bật chế độ chỉnh sửa: Bấm trực tiếp vào ô bất kỳ để sửa nội dung</span>
+        <div class="merger-edit-actions">
+          <button type="button" class="btn small" id="mergerAddRowBtn">+ Thêm dòng mới</button>
+          <button type="button" class="btn small outline danger" id="mergerDeleteRowBtn">✕ Xóa dòng chọn</button>
         </div>
       </div>
 
