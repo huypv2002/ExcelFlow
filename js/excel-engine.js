@@ -178,7 +178,7 @@
   return false;
  }
  function hasFormula(sheet,row){const node=sheet.rows.get(row);return !!node&&xmlChildren(node,'c').some(c=>!!first(c,'f'));}
- const FORMAT_INFO={auto:{type:'auto',code:null},text:{type:'text',code:'@'},number:{type:'number',code:'General'},integer:{type:'number',code:'#,##0'},decimal:{type:'number',code:'#,##0.00'},money:{type:'number',code:'#,##0 "₫"'},percent:{type:'percent',code:'0.00%'},date:{type:'date',code:'dd/mm/yyyy'},'date-iso':{type:'date',code:'yyyy-mm-dd'},datetime:{type:'datetime',code:'dd/mm/yyyy hh:mm:ss'}};
+ const FORMAT_INFO={auto:{type:'auto',code:null},text:{type:'text',code:'@'},number:{type:'number',code:'General'},integer:{type:'number',code:'#,##0'},decimal:{type:'number',code:'#,##0.00'},money:{type:'number',code:'#,##0 "₫"'},percent:{type:'percent',code:'0.00%'},date:{type:'date',code:'[$-42A]dd/mm/yyyy;@'},'date-iso':{type:'date',code:'yyyy-mm-dd'},datetime:{type:'datetime',code:'[$-42A]dd/mm/yyyy hh:mm:ss;@'}};
  function parseRange(scope){
   const v=scope.trim().toUpperCase().replaceAll('$','');let m;
   if((m=/^([A-Z]{1,3})$/.exec(v)))return {r1:1,r2:1048576,c1:colIndex(m[1]),c2:colIndex(m[1])};
@@ -269,7 +269,37 @@
   async function prepare(){const file=zip.file('xl/styles.xml');if(!file)return;
    doc=xmlParse(await file.async('string'));const root=doc.documentElement;xfs=first(root,'cellXfs');
    numFmts=first(root,'numFmts');if(!numFmts){numFmts=doc.createElementNS(NS,'numFmts');root.insertBefore(numFmts,root.firstElementChild);numFmts.setAttribute('count','0');}
-   for(const f of xmlChildren(numFmts,'numFmt')){const id=Number(f.getAttribute('numFmtId'));const code=f.getAttribute('formatCode');if(id>=164&&code)formatMap.set(code,id);nextFmt=Math.max(nextFmt,id+1);}
+   for(const f of xmlChildren(numFmts,'numFmt')){
+     const id=Number(f.getAttribute('numFmtId'));
+     let code=f.getAttribute('formatCode')||'';
+     if(/年|月|日|\[\$-411\]|\[\$-804\]|\[\$-0411\]|\[\$-0804\]/i.test(code)){
+       code='[$-42A]dd/mm/yyyy;@';
+       f.setAttribute('formatCode',code);
+     }
+     if(id>=164&&code)formatMap.set(code,id);
+     nextFmt=Math.max(nextFmt,id+1);
+   }
+   const viDateCode='[$-42A]dd/mm/yyyy;@';
+   let viDateFmtId=formatMap.get(viDateCode);
+   if(!viDateFmtId){
+     viDateFmtId=nextFmt++;
+     const f=doc.createElementNS(NS,'numFmt');
+     f.setAttribute('numFmtId',String(viDateFmtId));
+     f.setAttribute('formatCode',viDateCode);
+     numFmts.appendChild(f);
+     numFmts.setAttribute('count',String(xmlChildren(numFmts,'numFmt').length));
+     formatMap.set(viDateCode,viDateFmtId);
+   }
+   if(xfs){
+     const cjkBuiltinDates=new Set([14,30,31,55,56,57,58]);
+     for(const xf of xmlChildren(xfs,'xf')){
+       const nid=Number(xf.getAttribute('numFmtId'));
+       if(cjkBuiltinDates.has(nid)){
+         xf.setAttribute('numFmtId',String(viDateFmtId));
+         xf.setAttribute('applyNumberFormat','1');
+       }
+     }
+   }
   }
   function assign(cell,code){if(!code||!doc||!xfs)return;
    const original=Number(cell.getAttribute('s')||0),key=original+'|'+code;
@@ -361,7 +391,31 @@
      summary.examined++;fileStats[sourceIndex].read++;
      if(cfg.skipEmpty&&!cfg.mappings.some(m=>{const v=cellValue(src,sourceBook,sr,m.source);return v&&v.kind!=='e'&&v.raw!=='';})){
        summary.skippedEmpty++;skipDetails.push(skipRecord('empty_row','row',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:'Dòng '+sr}));continue;}
-      if(cfg.skipZeros&&cfg.mappings.some(m=>{const raw=cellValue(src,sourceBook,sr,m.source);if(!raw||raw.raw===''||raw.kind==='e')return false;const clean=String(raw.raw).replace(/[^\d.-]/g,'').trim();return clean==='0'||clean==='0.0'||clean==='0.00';})){summary.skippedZeros=(summary.skippedZeros||0)+1;skipDetails.push(skipRecord('zero_value','row',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:'Dòng '+sr,dest:'Số tiền = 0'}));continue;}
+      if(cfg.skipZeros){
+        let isZero = false;
+        for(const m of cfg.mappings){
+          const raw = cellValue(src, sourceBook, sr, m.source);
+          if(!raw || raw.raw === '' || raw.kind === 'e') continue;
+          const s = String(raw.raw).trim();
+          const clean = s.replace(/[^\d.-]/g, '');
+          const valNum = Number(clean);
+          const isNumZero = (!isNaN(valNum) && valNum === 0 && clean.length > 0) || s === '0' || s === '0.0' || s === '0,0' || s === '0.00' || s === '0,00' || s === '0 ₫' || s === '0 đ';
+          if(isNumZero){
+            const targetHeader = cellValue(dst, dstBook, cfg.targetHeaderRow, m.target);
+            const sourceHeader = cellValue(src, sourceBook, cfg.headerRow, m.source);
+            const combinedHeaders = (targetHeader?.raw || '') + ' ' + (sourceHeader?.raw || '');
+            if(/tiền|amount|giá|phát\s*sinh|nợ|có|thu|chi/i.test(combinedHeaders) || cfg.mappings.length <= 3){
+              isZero = true;
+              break;
+            }
+          }
+        }
+        if(isZero){
+          summary.skippedZeros = (summary.skippedZeros || 0) + 1;
+          skipDetails.push(skipRecord('zero_value', 'row', { file: sourceName, sheet: cfg.sources[sourceIndex].sourceSheet, source: 'Dòng ' + sr, dest: 'Số tiền = 0' }));
+          continue;
+        }
+      }
      let tr;
      if(cfg.matchMode==='position'){
        if(cfg.rowFilter!=='all'||cfg.targetMode==='auto'){
@@ -408,7 +462,7 @@
        if(reason)skipDetails.push(skipRecord(reason,'cell',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:addr(srcLoc.row,srcLoc.col),dest:destination,sourceValue:displayImport(val,rule),targetValue:oldVal?formatValue(oldVal):''}));
        else {
          doWrite=true;
-         changes.push({src:(sourceIndex+1)+". "+sourceName+" · "+addr(srcLoc.row,srcLoc.col),sourceFile:sourceName,sourceIndex,srcMerge:mergeRef(srcLoc.merge),dst:destination,dstMerge:mergeRef(loc.merge),row:loc.row,col:loc.col,old:oldVal?formatValue(oldVal):'',new:displayImport(val,rule),value:val,formatCode:rule?.code||null,formatType:rule?.type||'auto'});
+         changes.push({src:(sourceIndex+1)+". "+sourceName+" · "+addr(srcLoc.row,srcLoc.col),sourceFile:sourceName,sourceIndex,srcMerge:mergeRef(srcLoc.merge),dst:destination,dstMerge:mergeRef(loc.merge),row:loc.row,_origRow:loc.row,col:loc.col,old:oldVal?formatValue(oldVal):'',new:displayImport(val,rule),value:val,formatCode:rule?.code||null,formatType:rule?.type||'auto'});
          rec.changed++;
        }
        const after=doWrite?val:oldVal,sNum=numericValue(val,rule);

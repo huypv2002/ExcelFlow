@@ -79,9 +79,17 @@
       const opt = $('addTarget') ? [...$('addTarget').options].find(o => String(o.value) === target) : null;
       return { id: target || ('col_' + Math.random().toString(36).slice(2,6)), name: (opt ? opt.textContent : 'Cột ' + target).replace(/^[A-Z]+(?:[–-][A-Z]+)?\s*[·.:\-]\s*/, '').trim() || ('Cột ' + target) };
     }) : [];
+
+    // Lưu danh sách vị trí dòng đích ban đầu để khi dồn dòng không để lại khoảng trống
+    if(result && Array.isArray(result.changes)){
+      const rowSet = new Set(result.changes.map(c => Number(c.row)).filter(r => Number.isInteger(r) && r > 0));
+      result._initialRowSlots = Array.from(rowSet).sort((a,b) => a - b);
+    }
+
     const map = new Map();
     (result?.changes || []).forEach((ch, idx) => {
-      const key = ch.sourceIndex + '|' + ch.row;
+      if(!ch._origRow) ch._origRow = ch.row;
+      const key = ch.sourceIndex + '|' + ch._origRow;
       if(!map.has(key)) map.set(key, {
         _id: 'row_' + key,
         kind: 'import',
@@ -91,6 +99,7 @@
         note: 'Nhập mới',
         values: {},
         row: ch.row ?? '',
+        _origRow: ch._origRow,
         sourceIndex: ch.sourceIndex ?? '',
         matched: true
       });
@@ -225,13 +234,85 @@
     renderModalTable();
   }
 
-    function isZeroValue(v){
+  function colLetter(num){
+    let s = '';
+    for(; num > 0; num = Math.floor((num - 1) / 26)) s = String.fromCharCode(65 + (num - 1) % 26) + s;
+    return s;
+  }
+
+  function syncChangesAndShiftRows(){
+    const preview = window.__excelFlowPreview;
+    if(!preview) return;
+
+    if(!preview._initialRowSlots || !preview._initialRowSlots.length){
+      if(Array.isArray(preview.changes) && preview.changes.length){
+        const rowSet = new Set(preview.changes.map(c => Number(c.row)).filter(r => Number.isInteger(r) && r > 0));
+        preview._initialRowSlots = Array.from(rowSet).sort((a,b) => a - b);
+      } else {
+        preview._initialRowSlots = [];
+      }
+    }
+    const initialSlots = preview._initialRowSlots;
+
+    const remainingImportRows = modalRows.filter(r => r.kind === 'import');
+    const remainingKeys = new Set(remainingImportRows.map(r => r._id));
+
+    if(Array.isArray(preview.changes)){
+      preview.changes = preview.changes.filter(ch => {
+        const origRow = ch._origRow ?? ch.row;
+        const key = 'row_' + ch.sourceIndex + '|' + origRow;
+        return remainingKeys.has(key);
+      });
+
+      remainingImportRows.forEach((r, idx) => {
+        const newTargetRow = idx < initialSlots.length 
+          ? initialSlots[idx] 
+          : (initialSlots.length ? (initialSlots[initialSlots.length - 1] + (idx - initialSlots.length + 1)) : (idx + 1));
+        
+        const oldRow = r.row;
+        r.row = newTargetRow;
+        r.dest = 'Dòng ' + newTargetRow;
+
+        preview.changes.forEach(ch => {
+          if(!ch._origRow) ch._origRow = oldRow;
+          const key = 'row_' + ch.sourceIndex + '|' + ch._origRow;
+          if(key === r._id){
+            ch.row = newTargetRow;
+            ch.dst = colLetter(ch.col) + newTargetRow;
+          }
+        });
+      });
+    }
+
+    if(preview.summary){
+      preview.summary.matched = remainingImportRows.length;
+    }
+
+    const statChanges = document.getElementById('statChanges');
+    if(statChanges && preview.changes) statChanges.textContent = String(preview.changes.length);
+    const statRows = document.getElementById('statRows');
+    if(statRows) statRows.textContent = String(remainingImportRows.length);
+
+    const previewTable = document.getElementById('previewTable');
+    if(previewTable && preview.changes && preview.changes.length){
+      const list = preview.changes.slice(0, 150);
+      const escHtml = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const html = '<table class="data-table"><thead><tr><th>File / Ô nguồn</th><th>Ô đích</th><th>Trước khi nhập</th><th>Sau khi nhập</th></tr></thead><tbody>' +
+        list.map(ch => '<tr><td>' + escHtml(ch.src) + '</td><td><strong>' + escHtml(ch.dst) + '</strong></td><td>' + escHtml(ch.old || '(trống)') + '</td><td class="diff">' + escHtml(ch.new) + '</td></tr>').join('') +
+        '</tbody></table>';
+      previewTable.innerHTML = html;
+    }
+  }
+
+  function isZeroValue(v){
     if(v === 0 || v === '0') return true;
     if(typeof v === 'string'){
       const s = v.trim();
-      if(s === '0' || s === '0.0' || s === '0,0' || s === '0.00' || s === '0,00' || s === '-0') return true;
+      if(s === '0' || s === '0.0' || s === '0,0' || s === '0.00' || s === '0,00' || s === '-0' || s === '0 ₫' || s === '0 đ') return true;
       const clean = s.replace(/[^\d.-]/g, '');
-      if(clean === '0' || clean === '0.0' || clean === '0.00') return true;
+      if(clean === '0' || clean === '0.0' || clean === '0.00' || clean === '0,00') return true;
+      const num = Number(clean);
+      if(!isNaN(num) && num === 0 && clean.length > 0) return true;
     }
     return false;
   }
@@ -258,22 +339,16 @@
       else alert('Không tìm thấy dòng nào có giá trị bằng 0.');
       return;
     }
-    const ok = window.confirm('Tìm thấy ' + zeroRows.length + ' dòng có số tiền bằng 0. Bạn có chắc muốn loại bỏ toàn bộ các dòng này khỏi danh sách xem trước?');
+    const ok = window.confirm('Tìm thấy ' + zeroRows.length + ' dòng có số tiền bằng 0. Bạn có chắc muốn loại bỏ và tự động dồn các dòng còn lại lên liền kề?');
     if(!ok) return;
 
     modalRows = modalRows.filter(r => !isZeroRow(r));
     if(selectedRowId && zeroRows.some(r => r._id === selectedRowId)) selectedRowId = null;
 
-    if(window.__excelFlowPreview && Array.isArray(window.__excelFlowPreview.changes)){
-      const remainingKeys = new Set(modalRows.map(r => r._id));
-      window.__excelFlowPreview.changes = window.__excelFlowPreview.changes.filter(ch => {
-        const key = 'row_' + ch.sourceIndex + '|' + ch.row;
-        return remainingKeys.has(key);
-      });
-    }
-
+    syncChangesAndShiftRows();
     renderModalTable();
-    const msg = 'Đã loại bỏ ' + zeroRows.length + ' dòng có số tiền bằng 0!';
+
+    const msg = 'Đã loại bỏ ' + zeroRows.length + ' dòng số 0 và dồn các dòng lên liên tục!';
     if(typeof window.efToast === 'function') window.efToast(msg);
     else alert(msg);
   }
@@ -282,11 +357,16 @@
     if(!selectedRowId){ alert('Bạn hãy chọn một dòng trước khi xóa.'); return; }
     const row = modalRows.find(r => r._id === selectedRowId);
     if(!row) return;
-    const ok = window.confirm('Bạn muốn xóa dòng đang chọn khỏi popup xem trước?');
+    const ok = window.confirm('Bạn muốn xóa dòng đang chọn và dồn các dòng phía sau lên?');
     if(!ok) return;
     modalRows = modalRows.filter(r => r._id !== selectedRowId);
     selectedRowId = null;
+
+    syncChangesAndShiftRows();
     renderModalTable();
+
+    const msg = 'Đã xóa dòng và dồn thứ tự các dòng đích!';
+    if(typeof window.efToast === 'function') window.efToast(msg);
   }
 
   function bindPopupEvents(){
