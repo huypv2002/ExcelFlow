@@ -736,6 +736,9 @@
    el('comparePage')?.classList.toggle('active',compare);
    el('historyPage')?.classList.toggle('active',history);
 
+   // Ẩn thanh header hoàn toàn khi ở Trang chủ
+   if(el('efHeader')) el('efHeader').style.display = home ? 'none' : 'flex';
+
    el('navHome')?.classList.toggle('active',home);
    el('navHomeTab')?.classList.toggle('active',home);
    el('navImport')?.classList.toggle('active',isImport);

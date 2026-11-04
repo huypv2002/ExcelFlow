@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="ef-app">
-<header class="ef-header">
+<header class="ef-header" id="efHeader" style="display:none">
   <div class="ef-brand">
     <span class="ef-logo"><b>X</b></span>
     <button id="navHome" class="ef-brand-link nav active" type="button" title="Về trang chủ">ExcelFlow Suite</button>
@@ -29,104 +29,60 @@
 <div class="ef-shell">
 <!-- ================= TRANG CHỦ / APP WORKSPACE HUB ================= -->
 <section id="homePage" class="section active">
-  <div class="ef-launcher-container">
-    <div class="ef-launcher-header">
-      <div class="ef-launcher-title">
-        <h1>Trung tâm Ứng dụng Excel</h1>
-        <p>Bấm vào một chức năng bên dưới để bắt đầu làm việc</p>
-      </div>
-      <div class="ef-launcher-hint">
-        🔒 100% Cục bộ trên trình duyệt • Không tải file lên mạng
-      </div>
+  <div class="ef-home-minimal">
+    <div class="ef-brand-hero">
+      <div class="ef-brand-mark">X</div>
+      <h1 class="ef-brand-name">ExcelFlow</h1>
+      <p class="ef-brand-sub">Chọn chức năng để bắt đầu</p>
     </div>
 
-    <div class="ef-launcher-grid">
-      <!-- Nút 1: ExcelFlow (Active & Ready) -->
-      <button type="button" class="ef-app-btn active-app" data-app-id="excelflow" data-app-title="Ghép & Đối chiếu Excel">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-teal">⚡</div>
-          <span class="ef-btn-status ready">🟢 Sẵn sàng dùng</span>
-        </div>
-        <div class="ef-btn-title">Ghép &amp; Đối chiếu Excel (ExcelFlow)</div>
-        <div class="ef-btn-desc">Tự động ghép nối, đối chiếu dữ liệu nhiều file nguồn/sao kê vào file đích, preview và sửa trực tiếp.</div>
-        <div class="ef-btn-action-label">Mở ứng dụng ngay →</div>
+    <div class="ef-button-grid">
+      <!-- Nút 1: Ghép & Đối chiếu Excel (Active) -->
+      <button type="button" class="ef-btn-card is-active" data-app-id="excelflow" data-app-title="Ghép &amp; Đối chiếu Excel">
+        <span class="ef-card-badge">Sẵn sàng</span>
+        <span class="ef-card-name">Ghép &amp; Đối chiếu Excel</span>
       </button>
 
-      <!-- Nút 2: Gộp file -->
-      <button type="button" class="ef-app-btn" data-app-id="merger" data-app-title="Gộp nhiều file Excel">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-indigo">📚</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">Gộp nhiều File &amp; Sheet</div>
-        <div class="ef-btn-desc">Gộp hàng chục file bảng tính từ các chi nhánh/phòng ban thành một bảng tổng hợp duy nhất.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <!-- Nút 2: Gộp nhiều file -->
+      <button type="button" class="ef-btn-card" data-app-id="merger" data-app-title="Gộp nhiều file">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">Gộp nhiều file</span>
       </button>
 
       <!-- Nút 3: Tách file -->
-      <button type="button" class="ef-app-btn" data-app-id="splitter" data-app-title="Tách file theo điều kiện">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-orange">✂️</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">Tách File theo Điều kiện</div>
-        <div class="ef-btn-desc">Tự động chia nhỏ bảng tính lớn thành nhiều file con riêng biệt theo cột phân loại và đóng gói ZIP.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <button type="button" class="ef-btn-card" data-app-id="splitter" data-app-title="Tách file">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">Tách file</span>
       </button>
 
-      <!-- Nút 4: So sánh Diff -->
-      <button type="button" class="ef-app-btn" data-app-id="diff" data-app-title="So sánh 2 file Excel">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-blue">⚖️</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">So sánh 2 File (Diff)</div>
-        <div class="ef-btn-desc">Đối chiếu 2 phiên bản file bảng tính, tô màu các ô bị sửa đổi, số liệu lệch và xuất báo cáo.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <!-- Nút 4: So sánh 2 file -->
+      <button type="button" class="ef-btn-card" data-app-id="diff" data-app-title="So sánh 2 file">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">So sánh 2 file</span>
       </button>
 
       <!-- Nút 5: Làm sạch dữ liệu -->
-      <button type="button" class="ef-app-btn" data-app-id="cleaner" data-app-title="Làm sạch & Chuẩn hóa dữ liệu">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-emerald">✨</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">Làm sạch &amp; Chuẩn hóa</div>
-        <div class="ef-btn-desc">Xóa khoảng trắng thừa, chuẩn hóa ngày tháng, xóa dòng trùng lặp và chuyển số thành chữ.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <button type="button" class="ef-btn-card" data-app-id="cleaner" data-app-title="Làm sạch dữ liệu">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">Làm sạch dữ liệu</span>
       </button>
 
-      <!-- Nút 6: Chuyển đổi định dạng -->
-      <button type="button" class="ef-app-btn" data-app-id="converter" data-app-title="Chuyển đổi Excel sang CSV / PDF">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-purple">🔁</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">Chuyển đổi CSV / PDF</div>
-        <div class="ef-btn-desc">Chuyển đổi file Excel sang CSV chuẩn UTF-8 không lỗi font tiếng Việt và kết xuất bản in PDF.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <!-- Nút 6: Chuyển đổi CSV / PDF -->
+      <button type="button" class="ef-btn-card" data-app-id="converter" data-app-title="Chuyển đổi CSV / PDF">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">Chuyển đổi CSV / PDF</span>
       </button>
 
-      <!-- Nút 7: Tra cứu VLOOKUP -->
-      <button type="button" class="ef-app-btn" data-app-id="lookup" data-app-title="Tra cứu đa điều kiện VLOOKUP">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-amber">🎯</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">Tra cứu đa điều kiện</div>
-        <div class="ef-btn-desc">Tra cứu kết hợp nhiều điều kiện giữa các bảng tính lớn mà không lo bị đơ hay treo Excel.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <!-- Nút 7: Tra cứu dữ liệu -->
+      <button type="button" class="ef-btn-card" data-app-id="lookup" data-app-title="Tra cứu dữ liệu">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">Tra cứu dữ liệu</span>
       </button>
 
-      <!-- Nút 8: Sửa lỗi công thức -->
-      <button type="button" class="ef-app-btn" data-app-id="doctor" data-app-title="Bác sĩ Sửa lỗi công thức Excel">
-        <div class="ef-btn-top">
-          <div class="ef-btn-icon icon-rose">🩺</div>
-          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
-        </div>
-        <div class="ef-btn-title">Bác sĩ Công thức Excel</div>
-        <div class="ef-btn-desc">Tự động rà soát phát hiện các ô bị lỗi #REF!, #VALUE!, #N/A và đề xuất hướng xử lý.</div>
-        <div class="ef-btn-action-label">Bấm để mở</div>
+      <!-- Nút 8: Kiểm tra công thức -->
+      <button type="button" class="ef-btn-card" data-app-id="doctor" data-app-title="Kiểm tra công thức">
+        <span class="ef-card-badge muted">Sắp có</span>
+        <span class="ef-card-name">Kiểm tra công thức</span>
       </button>
     </div>
   </div>

@@ -1,5 +1,5 @@
 /**
- * ExcelFlow Suite — App Launcher Manager (Chỉ xử lý các nút bấm)
+ * ExcelFlow Suite — Trang chủ Tối giản (Chỉ có các nút bấm chức năng)
  */
 (function() {
   'use strict';
@@ -13,23 +13,23 @@
         t.textContent = message;
         t.classList.add('show');
         clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => t.classList.remove('show'), 3000);
+        showToast.timer = setTimeout(() => t.classList.remove('show'), 2500);
       }
     }
   }
 
   function init() {
-    // Gắn sự kiện click cho tất cả các nút bấm chức năng trên Trang chủ
-    const appButtons = document.querySelectorAll('.ef-app-btn');
+    // Gắn sự kiện click cho các nút bấm trên Trang chủ
+    const cards = document.querySelectorAll('.ef-btn-card');
 
-    appButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
         e.preventDefault();
-        const appId = btn.dataset.appId;
-        const appTitle = btn.dataset.appTitle || 'này';
+        const appId = card.dataset.appId;
+        const appTitle = card.dataset.appTitle || '';
 
         if (appId === 'excelflow') {
-          // Mở ngay công cụ ExcelFlow
+          // Mở công cụ ExcelFlow
           if (typeof window.efGoPage === 'function') {
             window.efGoPage('import');
           } else {
@@ -37,14 +37,13 @@
             if (navImport) navImport.click();
           }
         } else {
-          // Thông báo Toast nhẹ nhàng 2.5 giây, không mở bất kỳ popup nào
-          showToast(`⚡ Tính năng "${appTitle}" đang được hoàn thiện! Vui lòng dùng tính năng "Ghép & Đối chiếu Excel".`);
+          // Thông báo Toast nhẹ nhàng, không mở popup
+          showToast(`⚡ Chức năng "${appTitle}" đang được phát triển!`);
         }
       });
     });
   }
 
-  // Khởi động khi DOM sẵn sàng
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

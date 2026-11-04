@@ -1,8 +1,13 @@
 /* ==========================================================================
-   ExcelFlow Suite — Trang chủ App Launcher (Chỉ có các nút bấm chức năng)
+   ExcelFlow Suite — Trang chủ Tối giản (Chỉ có các nút bấm chức năng)
    ========================================================================== */
 
-/* Header Navigation Bar */
+/* Ẩn header mặc định khi ở trang chủ */
+.ef-header.is-hidden {
+  display: none !important;
+}
+
+/* Header Navigation Bar khi ở màn hình làm việc */
 .ef-main-nav {
   display: flex;
   align-items: center;
@@ -59,14 +64,6 @@
   height: 7px;
   border-radius: 50%;
   background: #10b981;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  animation: ef-pulse 2s infinite;
-}
-
-@keyframes ef-pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 /* Breadcrumb in ExcelFlow Sub-page */
@@ -114,209 +111,143 @@
 }
 
 /* ==========================================================================
-   Home Page: App Launcher Grid (Chỉ có các nút bấm)
+   Trang chủ Tối giản: Căn giữa, ít chữ, không icon thừa
    ========================================================================== */
-.ef-launcher-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 24px 0 60px;
-}
-
-.ef-launcher-header {
-  margin-bottom: 26px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-
-.ef-launcher-title h1 {
-  font-size: 26px;
-  font-weight: 850;
-  color: #0f172a;
-  letter-spacing: -0.6px;
-  margin: 0 0 6px;
-}
-
-.ef-launcher-title p {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.ef-launcher-hint {
-  font-size: 13px;
-  color: #0d9488;
-  font-weight: 650;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  padding: 6px 14px;
-  border-radius: 20px;
-}
-
-/* Lưới các nút bấm chức năng */
-.ef-launcher-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-/* Nút bấm chức năng dạng thẻ App Button */
-.ef-app-btn {
-  appearance: none;
-  border: 1.5px solid #e2e8f0;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 22px 20px;
-  text-align: left;
-  cursor: pointer;
+.ef-home-minimal {
+  min-height: 80vh;
   display: flex;
   flex-direction: column;
-  position: relative;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
-  width: 100%;
-  outline: none;
-}
-
-.ef-app-btn:hover {
-  transform: translateY(-4px);
-  border-color: #cbd5e1;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-}
-
-.ef-app-btn:active {
-  transform: translateY(-1px);
-}
-
-/* Nút Active / Featured (ExcelFlow) */
-.ef-app-btn.active-app {
-  border: 2px solid #0d9488;
-  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 45%);
-  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.15);
-}
-
-.ef-app-btn.active-app:hover {
-  border-color: #0f766e;
-  box-shadow: 0 14px 32px rgba(13, 148, 136, 0.25);
-}
-
-/* Top bar của nút: Icon + Badge */
-.ef-btn-top {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  width: 100%;
+  justify-content: center;
+  padding: 40px 20px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
-.ef-btn-icon {
+.ef-brand-hero {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.ef-brand-mark {
   width: 52px;
   height: 52px;
   border-radius: 14px;
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 900;
   display: grid;
   place-items: center;
-  font-size: 26px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.25);
 }
 
-.icon-teal { background: linear-gradient(135deg, #e6fffa, #99f6e4); color: #0d9488; }
-.icon-indigo { background: linear-gradient(135deg, #eef2ff, #c7d2fe); color: #4f46e5; }
-.icon-orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
-.icon-blue { background: linear-gradient(135deg, #eff6ff, #bfdbfe); color: #2563eb; }
-.icon-emerald { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); color: #059669; }
-.icon-purple { background: linear-gradient(135deg, #faf5ff, #e9d5ff); color: #9333ea; }
-.icon-amber { background: linear-gradient(135deg, #fffbeb, #fde68a); color: #d97706; }
-.icon-rose { background: linear-gradient(135deg, #fff1f2, #fecdd3); color: #e11d48; }
+.ef-brand-name {
+  font-size: 32px;
+  font-weight: 850;
+  color: #0f172a;
+  letter-spacing: -0.8px;
+  margin: 0 0 6px;
+}
 
-.ef-btn-status {
+.ef-brand-sub {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Lưới các nút chức năng (Minimal Button Grid) */
+.ef-button-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+/* Thẻ nút bấm */
+.ef-btn-card {
+  appearance: none;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 22px 18px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.ef-btn-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+}
+
+.ef-btn-card:active {
+  transform: translateY(-1px);
+}
+
+/* Nút Chức năng đang hoạt động (ExcelFlow) */
+.ef-btn-card.is-active {
+  border: 2px solid #0d9488;
+  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 60%);
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.12);
+}
+
+.ef-btn-card.is-active:hover {
+  border-color: #0f766e;
+  box-shadow: 0 12px 28px rgba(13, 148, 136, 0.22);
+}
+
+.ef-card-badge {
+  align-self: flex-start;
   font-size: 11px;
   font-weight: 750;
-  padding: 4px 10px;
-  border-radius: 20px;
-  letter-spacing: 0.3px;
-}
-
-.ef-btn-status.ready {
+  padding: 3px 9px;
+  border-radius: 6px;
   background: #d1fae5;
   color: #065f46;
-  border: 1px solid #6ee7b7;
+  letter-spacing: 0.2px;
 }
 
-.ef-btn-status.upcoming {
+.ef-card-badge.muted {
   background: #f1f5f9;
   color: #64748b;
-  border: 1px solid #e2e8f0;
+  font-weight: 600;
 }
 
-/* Tiêu đề & Mô tả trong nút */
-.ef-btn-title {
-  font-size: 16.5px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 7px;
-  line-height: 1.35;
-}
-
-.ef-btn-desc {
-  font-size: 13px;
-  color: #64748b;
-  line-height: 1.5;
-  margin: 0 0 16px;
-  flex-grow: 1;
-}
-
-/* Nút bấm nhỏ bên dưới thẻ */
-.ef-btn-action-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 38px;
-  border-radius: 10px;
-  font-size: 13px;
+.ef-card-name {
+  font-size: 15.5px;
   font-weight: 750;
-  transition: all 0.2s ease;
-}
-
-.ef-app-btn.active-app .ef-btn-action-label {
-  background: #0d9488;
-  color: #ffffff;
-}
-
-.ef-app-btn.active-app:hover .ef-btn-action-label {
-  background: #0f766e;
-}
-
-.ef-app-btn:not(.active-app) .ef-btn-action-label {
-  background: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
-}
-
-.ef-app-btn:not(.active-app):hover .ef-btn-action-label {
-  background: #f1f5f9;
   color: #1e293b;
-  border-color: #cbd5e1;
+  line-height: 1.35;
+  margin-top: 14px;
+}
+
+.ef-btn-card.is-active .ef-card-name {
+  color: #0d7a6e;
 }
 
 /* Responsive */
-@media (max-width: 900px) {
-  .ef-header {
-    height: auto !important;
-    padding: 12px 16px !important;
-    flex-wrap: wrap;
-    gap: 12px;
+@media (max-width: 860px) {
+  .ef-button-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
-  .ef-main-nav {
-    order: 3;
-    width: 100%;
-    margin-left: 0;
-    overflow-x: auto;
+  .ef-brand-name {
+    font-size: 26px;
   }
-  .ef-launcher-header {
-    flex-direction: column;
-    align-items: flex-start;
+}
+
+@media (max-width: 480px) {
+  .ef-button-grid {
+    grid-template-columns: 1fr;
   }
 }
