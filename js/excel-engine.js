@@ -17,7 +17,8 @@
  const rowFromAddress=s=>Number((s.match(/\d+/)||['0'])[0]);
  const niceNum=n=>new Intl.NumberFormat('vi-VN').format(n);
  const message=(text,kind='')=>{el('importStatus').textContent=text;el('importStatus').className='status '+kind;};
- const toast=(m)=>{const t=el('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),5000);};
+ const toast=(m)=>{const t=el('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),3000);};
+ window.efToast=toast;
  const sleep=()=>new Promise(r=>setTimeout(r,10));
  const namedBlob=(bytes,name)=>new Blob([bytes],{type:name.toLowerCase().endsWith('.csv')?'text/csv;charset=utf-8':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  const download=(blob,name)=>{const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),20000);};

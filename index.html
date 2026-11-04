@@ -29,97 +29,108 @@
 <div class="ef-shell">
 <!-- ================= TRANG CHỦ / APP WORKSPACE HUB ================= -->
 <section id="homePage" class="section active">
-  <div class="ef-home-container">
-    <!-- Hero Banner -->
-    <div class="ef-hero-card">
-      <div class="ef-hero-content">
-        <div class="ef-hero-tag">✨ NỀN TẢNG XỬ LÝ DỮ LIỆU EXCEL CLIENT-SIDE • BẢO MẬT 100%</div>
-        <h1 class="ef-hero-title">Bộ công cụ Tự động hóa &amp; Xử lý Excel <span>Chuyên sâu</span></h1>
-        <p class="ef-hero-desc">
-          Bức tranh toàn cảnh các giải pháp hỗ trợ xử lý bảng tính cho dân kế toán, tài chính và văn phòng. 
-          Toàn bộ dữ liệu được tính toán trực tiếp trên trình duyệt của bạn — tốc độ cao, không tải file lên server, an toàn dữ liệu tuyệt đối.
-        </p>
-        <div class="ef-hero-stats">
-          <div class="ef-stat-item">
-            <div class="ef-stat-icon">⚡</div>
-            <div class="ef-stat-text">
-              <strong>Xử lý siêu tốc</strong>
-              <span>RAM Streaming &amp; Web Worker</span>
-            </div>
-          </div>
-          <div class="ef-stat-item">
-            <div class="ef-stat-icon">🔒</div>
-            <div class="ef-stat-text">
-              <strong>100% Cục bộ</strong>
-              <span>Zero Cloud Leak</span>
-            </div>
-          </div>
-          <div class="ef-stat-item">
-            <div class="ef-stat-icon">📁</div>
-            <div class="ef-stat-text">
-              <strong>Không giới hạn</strong>
-              <span>Hàng chục vạn dòng dữ liệu</span>
-            </div>
-          </div>
-        </div>
+  <div class="ef-launcher-container">
+    <div class="ef-launcher-header">
+      <div class="ef-launcher-title">
+        <h1>Trung tâm Ứng dụng Excel</h1>
+        <p>Bấm vào một chức năng bên dưới để bắt đầu làm việc</p>
+      </div>
+      <div class="ef-launcher-hint">
+        🔒 100% Cục bộ trên trình duyệt • Không tải file lên mạng
       </div>
     </div>
 
-    <!-- Search & Filters -->
-    <div class="ef-hub-controls">
-      <div class="ef-search-wrapper">
-        <span class="ef-search-icon">🔍</span>
-        <input type="text" id="efHubSearch" class="ef-search-input" placeholder="Tìm kiếm nhanh công cụ (vd: ghép cột, sao kê ngân hàng, gộp file, tách sheet, làm sạch...)" autocomplete="off">
-      </div>
-      <div class="ef-filter-tabs" id="efFilterTabs">
-        <button type="button" class="ef-filter-btn active" data-filter="all">Tất cả chức năng (8)</button>
-        <button type="button" class="ef-filter-btn" data-filter="active">🟢 Đang hoạt động (1)</button>
-        <button type="button" class="ef-filter-btn" data-filter="matching">🔄 Đối chiếu &amp; Nhập liệu (2)</button>
-        <button type="button" class="ef-filter-btn" data-filter="processing">📑 Xử lý &amp; Cấu trúc (2)</button>
-        <button type="button" class="ef-filter-btn" data-filter="cleaning">🧹 Xử lý &amp; Làm sạch (1)</button>
-        <button type="button" class="ef-filter-btn" data-filter="utilities">⚙️ Tiện ích &amp; Sửa lỗi (3)</button>
-      </div>
-    </div>
+    <div class="ef-launcher-grid">
+      <!-- Nút 1: ExcelFlow (Active & Ready) -->
+      <button type="button" class="ef-app-btn active-app" data-app-id="excelflow" data-app-title="Ghép & Đối chiếu Excel">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-teal">⚡</div>
+          <span class="ef-btn-status ready">🟢 Sẵn sàng dùng</span>
+        </div>
+        <div class="ef-btn-title">Ghép &amp; Đối chiếu Excel (ExcelFlow)</div>
+        <div class="ef-btn-desc">Tự động ghép nối, đối chiếu dữ liệu nhiều file nguồn/sao kê vào file đích, preview và sửa trực tiếp.</div>
+        <div class="ef-btn-action-label">Mở ứng dụng ngay →</div>
+      </button>
 
-    <!-- Ecosystem App Grid -->
-    <div class="ef-app-grid" id="efAppGrid">
-      <!-- Rendered dynamically by js/home.js -->
-    </div>
+      <!-- Nút 2: Gộp file -->
+      <button type="button" class="ef-app-btn" data-app-id="merger" data-app-title="Gộp nhiều file Excel">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-indigo">📚</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
+        </div>
+        <div class="ef-btn-title">Gộp nhiều File &amp; Sheet</div>
+        <div class="ef-btn-desc">Gộp hàng chục file bảng tính từ các chi nhánh/phòng ban thành một bảng tổng hợp duy nhất.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
 
-    <!-- Trust & Architecture -->
-    <div class="ef-trust-card">
-      <div class="ef-trust-heading">
-        <h3>Kiến trúc xử lý bảo mật chuẩn Enterprise</h3>
-        <p>Khác với các công cụ online tải file lên máy chủ đám mây, ExcelFlow Suite vận hành hoàn toàn khép kín.</p>
-      </div>
-      <div class="ef-trust-grid">
-        <div class="ef-trust-item">
-          <div class="ef-trust-item-icon">🛡️</div>
-          <div class="ef-trust-item-info">
-            <h4>Bảo mật dữ liệu tuyệt đối</h4>
-            <p>Bảng lương, báo cáo tài chính hay sao kê ngân hàng không bao giờ rời khỏi máy tính của bạn.</p>
-          </div>
+      <!-- Nút 3: Tách file -->
+      <button type="button" class="ef-app-btn" data-app-id="splitter" data-app-title="Tách file theo điều kiện">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-orange">✂️</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
         </div>
-        <div class="ef-trust-item">
-          <div class="ef-trust-item-icon">🚀</div>
-          <div class="ef-trust-item-info">
-            <h4>Không lo treo đơ máy</h4>
-            <p>Thuật toán xử lý nhị phân bằng JSZip và DOM parser tối ưu giúp trình duyệt xử lý mượt mà.</p>
-          </div>
+        <div class="ef-btn-title">Tách File theo Điều kiện</div>
+        <div class="ef-btn-desc">Tự động chia nhỏ bảng tính lớn thành nhiều file con riêng biệt theo cột phân loại và đóng gói ZIP.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
+
+      <!-- Nút 4: So sánh Diff -->
+      <button type="button" class="ef-app-btn" data-app-id="diff" data-app-title="So sánh 2 file Excel">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-blue">⚖️</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
         </div>
-        <div class="ef-trust-item">
-          <div class="ef-trust-item-icon">📶</div>
-          <div class="ef-trust-item-info">
-            <h4>Hoạt động khi mất mạng</h4>
-            <p>Ứng dụng đã được nạp sẵn vào cache trình duyệt, bạn có thể ngắt kết nối Internet và sử dụng bất kỳ lúc nào.</p>
-          </div>
+        <div class="ef-btn-title">So sánh 2 File (Diff)</div>
+        <div class="ef-btn-desc">Đối chiếu 2 phiên bản file bảng tính, tô màu các ô bị sửa đổi, số liệu lệch và xuất báo cáo.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
+
+      <!-- Nút 5: Làm sạch dữ liệu -->
+      <button type="button" class="ef-app-btn" data-app-id="cleaner" data-app-title="Làm sạch & Chuẩn hóa dữ liệu">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-emerald">✨</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
         </div>
-      </div>
+        <div class="ef-btn-title">Làm sạch &amp; Chuẩn hóa</div>
+        <div class="ef-btn-desc">Xóa khoảng trắng thừa, chuẩn hóa ngày tháng, xóa dòng trùng lặp và chuyển số thành chữ.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
+
+      <!-- Nút 6: Chuyển đổi định dạng -->
+      <button type="button" class="ef-app-btn" data-app-id="converter" data-app-title="Chuyển đổi Excel sang CSV / PDF">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-purple">🔁</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
+        </div>
+        <div class="ef-btn-title">Chuyển đổi CSV / PDF</div>
+        <div class="ef-btn-desc">Chuyển đổi file Excel sang CSV chuẩn UTF-8 không lỗi font tiếng Việt và kết xuất bản in PDF.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
+
+      <!-- Nút 7: Tra cứu VLOOKUP -->
+      <button type="button" class="ef-app-btn" data-app-id="lookup" data-app-title="Tra cứu đa điều kiện VLOOKUP">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-amber">🎯</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
+        </div>
+        <div class="ef-btn-title">Tra cứu đa điều kiện</div>
+        <div class="ef-btn-desc">Tra cứu kết hợp nhiều điều kiện giữa các bảng tính lớn mà không lo bị đơ hay treo Excel.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
+
+      <!-- Nút 8: Sửa lỗi công thức -->
+      <button type="button" class="ef-app-btn" data-app-id="doctor" data-app-title="Bác sĩ Sửa lỗi công thức Excel">
+        <div class="ef-btn-top">
+          <div class="ef-btn-icon icon-rose">🩺</div>
+          <span class="ef-btn-status upcoming">Sắp ra mắt</span>
+        </div>
+        <div class="ef-btn-title">Bác sĩ Công thức Excel</div>
+        <div class="ef-btn-desc">Tự động rà soát phát hiện các ô bị lỗi #REF!, #VALUE!, #N/A và đề xuất hướng xử lý.</div>
+        <div class="ef-btn-action-label">Bấm để mở</div>
+      </button>
     </div>
   </div>
 </section>
-
-<!-- ================= CÔNG CỤ GHÉP & ĐỐI CHIẾU EXCEL (EXCELFLOW) ================= -->
 <section id="importPage" class="section">
 <div class="ef-page-breadcrumb">
   <button type="button" class="ef-back-home-btn" data-nav-home>← Quay lại Trang chủ Workspace</button>
@@ -258,36 +269,6 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
   <div class="ef-approval-actions"><button type="button" id="efApprovalCancel">Hủy</button><button type="button" id="efApprovalYes" class="ef-approval-yes">Đồng ý</button></div>
  </div>
 </div>
-<!-- Modal Giới thiệu Tính năng Sắp ra mắt -->
-<div id="efFeatureModalBackdrop" class="ef-feature-modal-backdrop" hidden>
-  <div class="ef-feature-modal" role="dialog" aria-modal="true" aria-labelledby="efFmodalTitle">
-    <div class="ef-fmodal-header">
-      <div class="ef-fmodal-title-box">
-        <span class="ef-fmodal-icon" id="efFmodalIcon">✨</span>
-        <div>
-          <h3 id="efFmodalTitle">Tiêu đề tính năng</h3>
-          <small id="efFmodalCategory" style="color: #64748b; font-size: 12px;"></small>
-        </div>
-      </div>
-      <button type="button" class="ef-fmodal-close" id="efFmodalClose" aria-label="Đóng">✕</button>
-    </div>
-    <div class="ef-fmodal-body">
-      <p class="ef-fmodal-desc" id="efFmodalDesc"></p>
-      <div class="ef-fmodal-spec">
-        <h4>Tính năng &amp; Khả năng nổi bật:</h4>
-        <ul id="efFmodalSpecs"></ul>
-      </div>
-      <div style="background: #e6f8f5; border: 1px solid #b7ecde; border-radius: 12px; padding: 12px 14px; color: #0b816d; font-size: 13px;">
-        💡 <strong>Bạn có thể dùng ngay:</strong> Chức năng <strong>Ghép &amp; Đối chiếu dữ liệu (ExcelFlow)</strong> hiện đã hoàn thiện và sẵn sàng phục vụ công việc của bạn!
-      </div>
-    </div>
-    <div class="ef-fmodal-footer">
-      <button type="button" class="btn" onclick="document.getElementById('efFeatureModalBackdrop').hidden=true">Đóng</button>
-      <button type="button" class="btn teal" id="efFmodalUseActive">Trải nghiệm ExcelFlow ngay →</button>
-    </div>
-  </div>
-</div>
-
 <script src="js/approval.js"></script>
 <script src="js/jszip.min.js"></script>
 <script src="js/excel-engine.js"></script>
