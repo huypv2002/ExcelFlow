@@ -22,6 +22,7 @@
  const sleep=()=>new Promise(r=>setTimeout(r,10));
  const namedBlob=(bytes,name)=>new Blob([bytes],{type:name.toLowerCase().endsWith('.csv')?'text/csv;charset=utf-8':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  const download=(blob,name)=>{const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),20000);};
+ window.efDownload=download;
  function xmlParse(text){const doc=new DOMParser().parseFromString(text,'application/xml');const err=doc.getElementsByTagName('parsererror')[0];if(err)throw Error('Tệp Excel có XML không hợp lệ: '+err.textContent.slice(0,140));return doc;}
  function normalizePath(p){const arr=[];for(const bit of p.replaceAll('\\','/').split('/')){if(bit==='..')arr.pop();else if(bit&&bit!=='.')arr.push(bit);}return arr.join('/');}
  function pathFromRel(target){const t=target.replace(/^\//,'');return normalizePath(target.startsWith('/')?t:'xl/'+t);}
@@ -348,7 +349,9 @@
     }
 
     if (sheetsResult.length > 0) {
-      return sheetsToXlsxZip(sheetsResult);
+      const zip = sheetsToXlsxZip(sheetsResult);
+      zip._sheets = sheetsResult;
+      return zip;
     }
   }
 
@@ -400,8 +403,12 @@
     grid.push(row);
   }
 
-  return sheetsToXlsxZip([{ name: 'Bảng PDF', grid }]);
+  const fallbackSheets = [{ name: 'Bảng PDF', grid }];
+  const zip = sheetsToXlsxZip(fallbackSheets);
+  zip._sheets = fallbackSheets;
+  return zip;
  }
+ window.efParsePdfToWorkbook = parsePdfToWorkbook;
 
  async function openWorkbook(file){
   if(!file||!/\.(xlsx|xlsm|pdf)$/i.test(file.name))throw Error('Chỉ hỗ trợ .xlsx, .xlsm hoặc .pdf. Hãy chọn đúng định dạng.');
@@ -976,7 +983,7 @@
  function showReconciliation(result){
   const r=result.reconcile,total=result.differences.length;
   el('reconRows').textContent=niceNum(result.summary.matched);el('reconMismatches').textContent=niceNum(total);el('reconPairs').textContent=niceNum(r.length);el('reconBadge').textContent=total?'Cần kiểm tra chênh lệch':'Đã đối chiếu';el('reconBadge').classList.toggle('warn',!!total);
-  el('reconStatus').textContent='Đã kiểm tra '+result.fileStats.length+' file nguồn. Ghép '+niceNum(result.summary.matched)+' dòng; '+niceNum(result.summary.skippedTotalSource)+' dòng tổng cộng nguồn đã bỏ qua. Có '+niceNum(result.changes.length)+' ô sẽ nhập.'+(result.summary.unmatched?'\n⚠ '+niceNum(result.summary.unmatched)+' dòng nguồn chưa ghép được với đích.':'')+(total?'\n⚠ '+niceNum(total)+' giá trị số vẫn chênh lệch sau khi nhập theo các quy tắc hiện tại.':'\n✓ Không phát hiện chênh lệch số trên các ô đã ghép và có giá trị số.');
+  el('reconStatus').textContent='Đã kiểm tra '+result.fileStats.length+' file nguồn. Ghép '+niceNum(result.summary.matched)+' dòng; '+niceNum(result.summary.skippedTotalSource)+' dòng tổng cộng nguồn đã bỏ qua. Có '+niceNum(result.changes.length)+' ô sẽ nhập.'+(result.summary.unmatched?'\n[Lưu ý] '+niceNum(result.summary.unmatched)+' dòng nguồn chưa ghép được với đích.':'')+(total?'\n[Lưu ý] '+niceNum(total)+' giá trị số vẫn chênh lệch sau khi nhập theo các quy tắc hiện tại.':'\n✓ Không phát hiện chênh lệch số trên các ô đã ghép và có giá trị số.');
   el('reconStatus').className='status '+(total||result.summary.unmatched?'warn':'ok');
   el('reconTable').innerHTML=reconciliationTable(r);
   const diffs=result.differences.slice(0,150);
@@ -1016,7 +1023,7 @@
  function showPreview(result){window.dispatchEvent(new CustomEvent('excelflow:preview',{detail:result}));
   el('statChanges').textContent=niceNum(result.changes.length);el('statRows').textContent=niceNum(result.summary.matched);
   showSkipDetails(result);el('previewLabel').textContent='Đã phân tích';
-  const s=result.summary;message('✓ Đã đối chiếu '+result.fileStats.length+' file nguồn, '+niceNum(s.examined)+' dòng; '+niceNum(s.matched)+' dòng khớp. Dự kiến nhập '+niceNum(result.changes.length)+' ô.'+(s.unmatched?'\n⚠ '+s.unmatched+(result.settings.matchMode==='key'?' dòng không tìm thấy khóa hợp lệ.':' dòng không tìm thấy vị trí đích phù hợp.'):'')+((s.dupSrc||s.dupDst)?'\n⚠ Khóa trùng: nguồn '+s.dupSrc+', đích '+s.dupDst+'. Các khóa trùng được bỏ qua.':'')+(s.skippedFormula?'\n✓ Đã bảo vệ '+s.skippedFormula+' ô có công thức.':'')+(s.skippedTotalSource||s.skippedTotalTarget?'\n✓ Đã bỏ '+s.skippedTotalSource+' dòng tổng cộng nguồn và '+s.skippedTotalTarget+' dòng tổng cộng đích.':'')+(s.skippedFormulaRows?'\n⚠ Không tìm thấy đủ dòng đích phù hợp: '+s.skippedFormulaRows+' giao dịch chưa ghép.':'')+(s.autoBlockedByTotal?'\n⚠ Bảng có dòng TỔNG CỘNG ở cuối; ứng dụng không tự ghi xuống dưới dòng tổng. Hãy tạo dòng trống phía trên dòng tổng.':'')+(s.unmatched?'\n⛔ Chưa thể xuất vì vẫn còn giao dịch chưa ghép. Hãy xử lý các dòng trên trước.':''),s.unmatched?'warn':'ok');
+  const s=result.summary;message('✓ Đã đối chiếu '+result.fileStats.length+' file nguồn, '+niceNum(s.examined)+' dòng; '+niceNum(s.matched)+' dòng khớp. Dự kiến nhập '+niceNum(result.changes.length)+' ô.'+(s.unmatched?'\n[Lưu ý] '+s.unmatched+(result.settings.matchMode==='key'?' dòng không tìm thấy khóa hợp lệ.':' dòng không tìm thấy vị trí đích phù hợp.'):'')+((s.dupSrc||s.dupDst)?'\n[Lưu ý] Khóa trùng: nguồn '+s.dupSrc+', đích '+s.dupDst+'. Các khóa trùng được bỏ qua.':'')+(s.skippedFormula?'\n✓ Đã bảo vệ '+s.skippedFormula+' ô có công thức.':'')+(s.skippedTotalSource||s.skippedTotalTarget?'\n✓ Đã bỏ '+s.skippedTotalSource+' dòng tổng cộng nguồn và '+s.skippedTotalTarget+' dòng tổng cộng đích.':'')+(s.skippedFormulaRows?'\n[Lưu ý] Không tìm thấy đủ dòng đích phù hợp: '+s.skippedFormulaRows+' giao dịch chưa ghép.':'')+(s.autoBlockedByTotal?'\n[Lưu ý] Bảng có dòng TỔNG CỘNG ở cuối; ứng dụng không tự ghi xuống dưới dòng tổng. Hãy tạo dòng trống phía trên dòng tổng.':'')+(s.unmatched?'\n[Lưu ý] Chưa thể xuất vì vẫn còn giao dịch chưa ghép. Hãy xử lý các dòng trên trước.':''),s.unmatched?'warn':'ok');
   const list=result.changes.slice(0,150);
   el('noPreview').style.display=list.length?'none':'block';el('previewTable').style.display=list.length?'block':'none';
   if(list.length){const html='<table class="data-table"><thead><tr><th>File / Ô nguồn</th><th>Ô đích</th><th>Trước khi nhập</th><th>Sau khi nhập</th></tr></thead><tbody>'+list.map(ch=>'<tr><td>'+escapeHtml(ch.src)+(ch.srcMerge?'<small style="display:block;color:#7690a7">Ô gộp '+escapeHtml(ch.srcMerge)+'</small>':'')+'</td><td><strong>'+escapeHtml(ch.dst)+'</strong>'+(ch.dstMerge?'<small style="display:block;color:#7690a7">Ô gộp '+escapeHtml(ch.dstMerge)+'</small>':'')+'</td><td>'+escapeHtml(ch.old||'(trống)')+'</td><td class="diff">'+escapeHtml(ch.new)+'</td></tr>').join('')+'</tbody></table>';el('previewTable').innerHTML=html;}
@@ -1059,7 +1066,7 @@
      importOptions:collectUI(),reconciliation:plan.reconcile,reconDifferences:plan.differences,skipDetails:plan.skipDetails,skipCount:plan.skipDetails.length,
      changes:plan.changes.map(({src,dst,old:newOld,new:newNew})=>({src,dst,old:newOld,new:newNew})),sourceBlob,beforeBlob:dstBook.file,afterBlob:outputBlob,logBlob:new Blob([csvLog(plan.changes)],{type:'text/csv;charset=utf-8'}),skipBlob:new Blob([skipCsv(plan.skipDetails)],{type:'text/csv;charset=utf-8'})});saved=true;
    }catch(err){console.error(err);toast('Đã tải Excel nhưng không lưu được lịch sử: '+err.message);}
-   message('✓ Đã xuất '+outName+' với '+niceNum(plan.changes.length)+' ô được nhập.'+(saved?'\n✓ Đã lưu cả dữ liệu trước và sau trong Lịch sử.':'\n⚠ Chưa lưu được lịch sử, hãy kiểm tra dung lượng trình duyệt.'),'ok');
+   message('✓ Đã xuất '+outName+' với '+niceNum(plan.changes.length)+' ô được nhập.'+(saved?'\n✓ Đã lưu cả dữ liệu trước và sau trong Lịch sử.':'\n[Lưu ý] Chưa lưu được lịch sử, hãy kiểm tra dung lượng trình duyệt.'),'ok');
    toast('Đã tạo file Excel'+(saved?' và lưu lịch sử':'')+'.');
   }catch(e){message('Không thể xuất file: '+e.message,'err');toast('Lỗi xuất: '+e.message);}
   finally{loading=false;el('exportBtn').disabled=!plan||!plan.changes.length||plan.summary.unmatched>0;}
@@ -1243,12 +1250,13 @@
 
  // Events and offline initialization.
  function goPage(which){
-   const history=which==='history',compare=which==='compare',home=which==='home';
-   const isImport=!history&&!compare&&!home;
+   const history=which==='history',compare=which==='compare',home=which==='home',pdf2excel=which==='pdf2excel';
+   const isImport=!history&&!compare&&!home&&!pdf2excel;
    el('homePage')?.classList.toggle('active',home);
    el('importPage')?.classList.toggle('active',isImport);
    el('comparePage')?.classList.toggle('active',compare);
    el('historyPage')?.classList.toggle('active',history);
+   el('pdf2ExcelPage')?.classList.toggle('active',pdf2excel);
 
    // Ẩn thanh header hoàn toàn khi ở Trang chủ
    if(el('efHeader')) el('efHeader').style.display = home ? 'none' : 'flex';
@@ -1256,6 +1264,7 @@
    el('navHome')?.classList.toggle('active',home);
    el('navHomeTab')?.classList.toggle('active',home);
    el('navImport')?.classList.toggle('active',isImport);
+   el('navPdf2Excel')?.classList.toggle('active',pdf2excel);
    el('navCompare')?.classList.toggle('active',compare);
    el('navHistory')?.classList.toggle('active',history);
 
@@ -1269,11 +1278,13 @@
  window.efGoPage=goPage;
  el('navHome')?.addEventListener('click',()=>goPage('home'));
  el('navHomeTab')?.addEventListener('click',()=>goPage('home'));
- el('navImport').onclick=()=>goPage('import');
- el('navCompare').onclick=()=>goPage('compare');
- el('navHistory').onclick=()=>goPage('history');
+ el('navImport')?.addEventListener('click',()=>goPage('import'));
+ el('navPdf2Excel')?.addEventListener('click',()=>goPage('pdf2excel'));
+ el('navCompare')?.addEventListener('click',()=>goPage('compare'));
+ el('navHistory')?.addEventListener('click',()=>goPage('history'));
  document.querySelectorAll('[data-nav-home]').forEach(btn=>btn.addEventListener('click',()=>goPage('home')));
  document.querySelectorAll('[data-nav-import]').forEach(btn=>btn.addEventListener('click',()=>goPage('import')));
+ document.querySelectorAll('[data-nav-pdf2excel]').forEach(btn=>btn.addEventListener('click',()=>goPage('pdf2excel')));
  // Source files are additive; only the destination remains a single file.
  const fileVersions={source:0,target:0};
  function fileIdentity(file){return [file.name,file.size,file.lastModified].join('::');}
@@ -1345,10 +1356,11 @@
    }
    if(added){await afterSourceListChange(srcEntries.length===added);}
    else refreshSourceUI();
-   message((added?'✓ Đã thêm '+added+' file nguồn. Hiện có '+srcEntries.length+' file. ':'')+(ignored?'Bỏ qua '+ignored+' file đã chọn trước đó. ':'')+(errors.length?'\n⚠ '+errors.join('\n'):'')+(dstBook?'\nBạn có thể ghép cột và xem trước.':'\nHãy chọn thêm một file đích.'),errors.length?'warn':'ok');
+   message((added?'✓ Đã thêm '+added+' file nguồn. Hiện có '+srcEntries.length+' file. ':'')+(ignored?'Bỏ qua '+ignored+' file đã chọn trước đó. ':'')+(errors.length?'\n[Lưu ý] '+errors.join('\n'):'')+(dstBook?'\nBạn có thể ghép cột và xem trước.':'\nHãy chọn thêm một file đích.'),errors.length?'warn':'ok');
   }finally{zone.classList.remove('is-loading');}
  }
  function queueSourceFiles(files){sourceQueue=sourceQueue.then(()=>addSourceFiles(files)).catch(e=>{message('Không đọc được file nguồn: '+e.message,'err');toast(e.message);});return sourceQueue;}
+ window.efAddSourceFiles = queueSourceFiles;
  async function loadExcelFile(file,kind){
   if(kind==='source')return queueSourceFiles([file]);
   if(!file)return;

@@ -36,9 +36,17 @@
             const navImport = document.getElementById('navImport');
             if (navImport) navImport.click();
           }
+        } else if (appId === 'pdf2excel') {
+          // Mở công cụ Chuyển từ PDF sang Excel
+          if (typeof window.efGoPage === 'function') {
+            window.efGoPage('pdf2excel');
+          } else {
+            const navPdf = document.getElementById('navPdf2Excel');
+            if (navPdf) navPdf.click();
+          }
         } else {
           // Thông báo Toast nhẹ nhàng, không mở popup
-          showToast(`⚡ Chức năng "${appTitle}" đang được phát triển!`);
+          showToast(`Chức năng "${appTitle}" đang được phát triển!`);
         }
       });
     });

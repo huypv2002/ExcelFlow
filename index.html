@@ -17,8 +17,9 @@
       <span class="ef-tagline">Trung tâm Công cụ Excel Thông minh</span>
     </div>
     <nav class="ef-main-nav">
-      <button id="navHomeTab" class="ef-nav-tab active" type="button" data-nav-home>🏠 Trang chủ</button>
-      <button id="navImport" class="ef-nav-tab" type="button" data-nav-import>⚡ Ghép &amp; Nhập liệu</button>
+      <button id="navHomeTab" class="ef-nav-tab active" type="button" data-nav-home>Trang chủ</button>
+      <button id="navImport" class="ef-nav-tab" type="button" data-nav-import>Ghép &amp; Nhập liệu</button>
+      <button id="navPdf2Excel" class="ef-nav-tab" type="button">Chuyển PDF sang Excel</button>
       <button id="navHistory" class="ef-nav-tab" type="button"><span class="ef-clock">◷</span> Lịch sử</button>
     </nav>
     <div class="ef-header-actions">
@@ -69,10 +70,10 @@
         <span class="ef-card-name">Làm sạch dữ liệu</span>
       </button>
 
-      <!-- Nút 6: Chuyển đổi CSV / PDF -->
-      <button type="button" class="ef-btn-card" data-app-id="converter" data-app-title="Chuyển đổi CSV / PDF">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">Chuyển đổi CSV / PDF</span>
+      <!-- Nút 6: Chuyển từ PDF sang Excel -->
+      <button type="button" class="ef-btn-card is-active" data-app-id="pdf2excel" data-app-title="Chuyển từ PDF sang Excel">
+        <span class="ef-card-badge">Sẵn sàng</span>
+        <span class="ef-card-name">Chuyển từ PDF sang Excel</span>
       </button>
 
       <!-- Nút 7: Tra cứu dữ liệu -->
@@ -170,8 +171,8 @@
         <select id="efTemplateSelect"><option value="">-- Chọn bộ mẫu để áp dụng --</option></select>
       </div>
       <div class="ef-preset-btn-group">
-        <button type="button" class="btn small" id="efSaveCurrentPreset" title="Lưu nhanh quy tắc ghép hiện tại thành một bộ mới">💾 Lưu bộ hiện tại</button>
-        <button type="button" class="btn small outline" id="efOpenPresetManager" title="Mở danh sách quản lý, thêm, sửa, xóa và tìm kiếm các bộ mẫu">⚙ Quản lý các bộ</button>
+        <button type="button" class="btn small" id="efSaveCurrentPreset" title="Lưu nhanh quy tắc ghép hiện tại thành một bộ mới">Lưu bộ hiện tại</button>
+        <button type="button" class="btn small outline" id="efOpenPresetManager" title="Mở danh sách quản lý, thêm, sửa, xóa và tìm kiếm các bộ mẫu">Quản lý các bộ</button>
       </div>
     </div>
     <details class="adv-details" id="mappingDetails"><summary>▸ Tôi muốn nhập hoặc sửa quy tắc bằng chữ cột</summary><div class="adv-body"><p class="helper" style="margin:0 0 9px">Mỗi dòng một cặp: <b>D → A</b> hoặc <b>M → F</b>. Ký tự D, M là cột trong file nguồn; A, F là cột file đích.</p><div class="field"><label for="mapping">Các cặp nguồn → đích</label><textarea id="mapping" placeholder="D -&gt; A
@@ -179,7 +180,7 @@ M -&gt; F" spellcheck="false"></textarea></div></div></details>
   </div>
 </section>
 <aside class="ef-card ef-audit" id="efAudit">
-  <div class="ef-card-heading"><span class="ef-icon">⚖</span><h2>Đối chiếu</h2></div>
+  <div class="ef-card-heading"><span class="ef-icon">▤</span><h2>Đối chiếu</h2></div>
   <div class="ef-metric-list">
     <div class="ef-metric"><span>Giao dịch đã ghép</span><strong id="statRows">0</strong></div>
     <div class="ef-metric"><span>Ô sẽ nhập</span><strong id="statChanges">0</strong></div>
@@ -215,13 +216,13 @@ M -&gt; F" spellcheck="false"></textarea></div></div></details>
 <div class="skip-table" id="skipTable"></div><p class="fineprint" id="skipFoot"></p>
 </section></div>
 </section>
-<details class="ef-settings"><summary><span class="ef-settings-icon">⚙</span> Cài đặt nhập liệu nâng cao <small>Đối chiếu theo mã, dòng nhập, định dạng và vùng dữ liệu</small></summary>
+<details class="ef-settings"><summary><span class="ef-settings-icon">≡</span> Cài đặt nhập liệu nâng cao <small>Đối chiếu theo mã, dòng nhập, định dạng và vùng dữ liệu</small></summary>
 <div class="ef-settings-grid">
-  <div class="ef-settings-group"><h3>Vùng dữ liệu & vị trí nhập</h3><label class="checkline multi-range-option"><input checked="" id="autoSourceRange" type="checkbox"/><span><b>Tự tìm vùng giao dịch riêng trong từng file</b><span class="muted" style="display:block;font-size:12px">Khuyên dùng cho sao kê các tháng có số dòng khác nhau.</span></span></label><div class="twocol" style="margin-top:14px;align-items:start"><div class="field"><label for="targetMode">Ứng dụng tìm vị trí nhập thế nào?</label><select id="targetMode"><option value="auto">✨ Tự tìm dòng trống phù hợp (khuyên dùng)</option><option value="manual">Tôi sẽ chỉ dòng bắt đầu</option></select></div><div class="field" id="manualTargetField" style="display:none"><label for="targetStart">Dòng bắt đầu của file đích</label><input id="targetStart" min="1" type="number" value="2"/></div></div><details class="adv-details" id="rangeDetails"><summary>⚙ Chỉnh vùng dữ liệu dòng bắt đầu / dòng kết thúc</summary><div class="adv-body">
+  <div class="ef-settings-group"><h3>Vùng dữ liệu & vị trí nhập</h3><label class="checkline multi-range-option"><input checked="" id="autoSourceRange" type="checkbox"/><span><b>Tự tìm vùng giao dịch riêng trong từng file</b><span class="muted" style="display:block;font-size:12px">Khuyên dùng cho sao kê các tháng có số dòng khác nhau.</span></span></label><div class="twocol" style="margin-top:14px;align-items:start"><div class="field"><label for="targetMode">Ứng dụng tìm vị trí nhập thế nào?</label><select id="targetMode"><option value="auto">Tự tìm dòng trống phù hợp (khuyên dùng)</option><option value="manual">Tôi sẽ chỉ dòng bắt đầu</option></select></div><div class="field" id="manualTargetField" style="display:none"><label for="targetStart">Dòng bắt đầu của file đích</label><input id="targetStart" min="1" type="number" value="2"/></div></div><details class="adv-details" id="rangeDetails"><summary>Chỉnh vùng dữ liệu dòng bắt đầu / dòng kết thúc</summary><div class="adv-body">
 <div class="twocol"><div class="field"><label for="sourceStart">Dòng giao dịch đầu tiên (nguồn)</label><input id="sourceStart" min="1" type="number" value="2"/><p class="helper">Dòng bắt đầu đọc các giao dịch.</p></div><div class="field"><label for="sourceEnd">Dòng giao dịch cuối cùng (nguồn)</label><input id="sourceEnd" min="1" placeholder="Tự lấy đến cuối sheet" type="number"/><p class="helper">Để trống nếu muốn tự lấy đến hết bảng.</p></div></div>
 <button class="btn" id="detectRange" style="margin-top:11px" type="button">⌕ Tự tìm lại vùng giao dịch</button>
 </div></details><div aria-live="polite" class="smart-info neutral" id="sourceInsight">Sau khi chọn các sao kê, ứng dụng sẽ tự tìm các giao dịch và ô gộp của từng file.</div><div aria-label="Xem mẫu giao dịch từ file nguồn" class="mini-sample" id="sourcePeek" style="display:none"></div></div>
-  <div class="ef-settings-group"><h3>Quy tắc & định dạng</h3><div class="field" style="margin-top:14px"><label for="rowFilter">Chọn những dòng nào được ghi ở file đích</label><select id="rowFilter"><option value="all">Mọi dòng hợp lệ</option><option value="withFormula">Chỉ dòng đang có công thức (không ghi đè ô công thức)</option><option value="withoutFormula">Chỉ dòng không có công thức</option></select></div><label class="checkline"><input type="checkbox" id="skipEmpty" checked> Bỏ dòng trống</label><button class="btn bank-btn" id="bankPreset" type="button">↕ Áp dụng cài đặt nhanh cho sao kê ngân hàng</button><details class="adv-details"><summary>⚙ Các tùy chọn khác (ghép bằng mã, dữ liệu trống, định dạng vùng)</summary><div class="adv-body">
+  <div class="ef-settings-group"><h3>Quy tắc & định dạng</h3><div class="field" style="margin-top:14px"><label for="rowFilter">Chọn những dòng nào được ghi ở file đích</label><select id="rowFilter"><option value="all">Mọi dòng hợp lệ</option><option value="withFormula">Chỉ dòng đang có công thức (không ghi đè ô công thức)</option><option value="withoutFormula">Chỉ dòng không có công thức</option></select></div><label class="checkline"><input type="checkbox" id="skipEmpty" checked> Bỏ dòng trống</label><button class="btn bank-btn" id="bankPreset" type="button">↕ Áp dụng cài đặt nhanh cho sao kê ngân hàng</button><details class="adv-details"><summary>Các tùy chọn khác (ghép bằng mã, dữ liệu trống, định dạng vùng)</summary><div class="adv-body">
 <div class="twocol"><div class="field"><label for="matchMode">Ghép giao dịch như thế nào?</label><select id="matchMode"><option value="position">Theo thứ tự từ trên xuống</option><option value="key">Dò theo mã giao dịch / mã chung</option></select></div><div class="field"><label for="writeMode">Nếu ô đích đã có dữ liệu</label><select id="writeMode"><option value="replace">Thay giá trị cũ (trừ công thức)</option><option value="empty">Chỉ ghi khi ô trống</option></select></div></div>
 <div class="twocol" id="keys" style="display:none;margin-top:12px"><div class="field"><label for="sourceKey">Cột chứa mã ở file nguồn</label><select id="sourceKey"></select></div><div class="field"><label for="targetKey">Cột chứa mã ở file đích</label><select id="targetKey"></select></div></div>
 <label class="checkline"><input checked="" id="skipBlank" type="checkbox"/> Không xóa ô đích khi ô nguồn trống</label>
@@ -235,6 +236,76 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
 </div></details></div>
 </div></details>
 <p class="ef-security-note">Dữ liệu được xử lý trên thiết bị. File nguồn và file đích gốc không bị chỉnh sửa.</p>
+</section>
+<section class="section" id="pdf2ExcelPage">
+  <div class="ef-page-breadcrumb">
+    <button type="button" class="ef-back-home-btn" data-nav-home>← Quay lại Trang chủ Workspace</button>
+    <span class="ef-badge-active-tool">Công cụ đang mở: Chuyển từ PDF sang Excel (100% Offline)</span>
+  </div>
+
+  <div class="pdf2excel-wrapper">
+    <div class="pdf2excel-head">
+      <div class="ef-card-heading">
+        <span class="ef-icon">▤</span>
+        <h2>Chuyển đổi PDF sang file Excel (.xlsx)</h2>
+      </div>
+      <p class="helper">Tự động nhận diện cấu trúc bảng tính, tờ khai thuế GTGT (01-1 bán ra, 01-2 mua vào) và sao kê ngân hàng. Dữ liệu xử lý an toàn 100% trên trình duyệt của bạn.</p>
+    </div>
+
+    <!-- Dropzone PDF -->
+    <div class="ef-card pdf2excel-upload-card" id="pdf2ExcelUploadCard">
+      <div aria-label="Kéo thả file PDF hoặc bấm chọn" class="filebox dropzone" id="pdf2ExcelDrop" role="group" tabindex="0">
+        <div class="drop-main">
+          <span class="drop-ico">↧</span>
+          <span><strong>Thả file PDF vào đây hoặc bấm để chọn file</strong><small>Hỗ trợ tờ khai thuế (01/GTGT), sao kê ngân hàng, bảng tính .pdf</small></span>
+        </div>
+        <input accept=".pdf" aria-label="Chọn file PDF cần chuyển đổi" id="pdf2ExcelFileInput" type="file" />
+        <div aria-live="polite" class="filename" id="pdf2ExcelFileName">Chưa chọn file PDF</div>
+      </div>
+      <div id="pdf2ExcelLoading" class="pdf2excel-loading" style="display:none">
+        <span class="pdf2excel-spinner"></span>
+        <span id="pdf2ExcelLoadingText">Đang phân tích cấu trúc PDF và trích xuất bảng tính Excel...</span>
+      </div>
+    </div>
+
+    <!-- Kết quả chuyển đổi & Xem trước dữ liệu -->
+    <div class="ef-card pdf2excel-result-card" id="pdf2ExcelResultArea" style="display:none">
+      <div class="pdf2excel-result-bar">
+        <div class="pdf2excel-doc-meta">
+          <div class="pdf2excel-doc-badge" id="pdf2ExcelDocType">Bảng tính Excel (.xlsx)</div>
+          <h3 id="pdf2ExcelDocTitle">document.xlsx</h3>
+          <p class="helper" id="pdf2ExcelDocSubtitle">Đã trích xuất thành công</p>
+        </div>
+        <div class="pdf2excel-btn-bar">
+          <button type="button" class="btn teal primary-action" id="pdf2ExcelDownloadBtn">⇩ Tải file Excel (.xlsx)</button>
+          <button type="button" class="btn" id="pdf2ExcelSendToImportBtn" title="Chuyển file này sang màn hình Ghép & Nhập liệu">⇄ Đưa vào Ghép &amp; Nhập liệu</button>
+          <button type="button" class="btn outline" id="pdf2ExcelResetBtn">✕ Chọn file khác</button>
+        </div>
+      </div>
+
+      <!-- Sheet tabs nếu có nhiều sheet -->
+      <div class="pdf2excel-sheet-nav" id="pdf2ExcelSheetNav" style="display:none"></div>
+
+      <!-- Bảng xem trước dữ liệu -->
+      <div class="pdf2excel-table-container">
+        <div class="pdf2excel-table-bar">
+          <div class="pdf2excel-sheet-stat">
+            <strong id="pdf2ExcelCurrentSheetName">Sheet 1</strong>
+            <span class="muted" id="pdf2ExcelCurrentSheetStats">0 dòng · 0 cột</span>
+          </div>
+          <div class="pdf2excel-search-box">
+            <input type="text" id="pdf2ExcelSearchInput" placeholder="Tìm kiếm trong bảng..." />
+          </div>
+        </div>
+        <div class="preview-area" id="pdf2ExcelTableArea" style="max-height: 480px; overflow: auto;"></div>
+        <div class="pdf2excel-pagination-bar" id="pdf2ExcelPaginationBar">
+          <button type="button" class="btn small" id="pdf2ExcelPrevPage">‹ Trước</button>
+          <span id="pdf2ExcelPageNumber">Trang 1 / 1</span>
+          <button type="button" class="btn small" id="pdf2ExcelNextPage">Tiếp ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 <section class="section" id="comparePage"><button type="button" class="ef-page-return" data-return-home>← Về trang nhập liệu</button>
 <div class="top"><div><h1>Đối chiếu số liệu trước khi nhập</h1><p class="sub">So tổng số liệu giữa 2 file theo các cột và dòng bạn đã ghép, trước và sau khi nhập dự kiến.</p></div><span class="pill" id="reconBadge">Chưa đối chiếu</span></div>
@@ -271,6 +342,7 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
 <script src="js/preview.js"></script>
 <script src="js/search-crud.js"></script>
 <script src="js/home.js"></script>
+<script src="js/pdf2excel.js"></script>
 
 
 </body></html>

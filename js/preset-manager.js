@@ -265,7 +265,7 @@
         formatsEl.dispatchEvent(new Event('input', { bubbles: true }));
       }
       mappingEl.dispatchEvent(new Event('input', { bubbles: true }));
-      toast(`✨ Đã tự động khớp ${newMappings.length} cặp cột từ bộ nhớ đã học!`);
+      toast(`Đã tự động khớp ${newMappings.length} cặp cột từ bộ nhớ đã học!`);
     }
   }
   window.efAutoMapColumns = autoMapColumns;
@@ -335,7 +335,7 @@
         <div class="ef-preview-modal ef-preset-modal-box" id="efPresetModal" role="dialog" aria-modal="true" aria-labelledby="efPresetModalTitle">
           <div class="ef-modal-header">
             <div class="ef-modal-title">
-              <div class="ef-icon">📁</div>
+              <div class="ef-icon">▤</div>
               <div>
                 <h3 id="efPresetModalTitle">Quản lý các bộ mẫu ghép cột</h3>
                 <p>Lưu trữ, tìm kiếm và tái sử dụng các quy tắc ghép cột cho từng loại sao kê / đối tác.</p>
@@ -423,7 +423,7 @@
     if (!filtered.length) {
       grid.innerHTML = `
         <div class="ef-preset-empty">
-          <div style="font-size:32px;margin-bottom:8px">📂</div>
+          <div style="font-size:32px;margin-bottom:8px">▤</div>
           <strong>Không tìm thấy bộ mẫu nào phù hợp.</strong>
           <p style="color:#64748b;font-size:12px;margin-top:4px">Bạn có thể tạo bộ mới bằng nút "+ Thêm bộ mới" phía trên.</p>
         </div>`;
@@ -456,9 +456,9 @@
           <div class="ef-preset-card-foot">
             <span class="ef-preset-time">Cập nhật: ${dateStr}</span>
             <div class="ef-preset-actions">
-              <button type="button" class="btn small primary ef-btn-apply" data-action="apply">⚡ Áp dụng</button>
-              <button type="button" class="btn small outline ef-btn-edit" data-action="edit">✎ Sửa</button>
-              <button type="button" class="btn small danger ef-btn-del" data-action="delete">✕ Xóa</button>
+              <button type="button" class="btn small primary ef-btn-apply" data-action="apply">Áp dụng</button>
+              <button type="button" class="btn small outline ef-btn-edit" data-action="edit">Sửa</button>
+              <button type="button" class="btn small danger ef-btn-del" data-action="delete">Xóa</button>
             </div>
           </div>
         </div>`;

@@ -922,4 +922,228 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
   }
 }
 
+/* =========================================================================
+   CHUYỂN ĐỔI PDF SANG EXCEL (PDF2EXCEL)
+   ========================================================================= */
+#pdf2ExcelPage {
+  display: none;
+}
+
+#pdf2ExcelPage.active {
+  display: block;
+}
+
+.pdf2excel-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pdf2excel-head h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.pdf2excel-upload-card {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.pdf2excel-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  margin-top: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pdf2excel-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #bbf7d0;
+  border-top-color: #16a34a;
+  border-radius: 50%;
+  animation: ef-spin 0.8s linear infinite;
+}
+
+@keyframes ef-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pdf2excel-result-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pdf2excel-result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pdf2excel-doc-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pdf2excel-doc-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 6px;
+}
+
+.pdf2excel-doc-meta h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.pdf2excel-btn-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pdf2excel-sheet-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.pdf2excel-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.pdf2excel-tab:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.pdf2excel-tab.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+.pdf2excel-tab .badge-count {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.pdf2excel-tab.active .badge-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.pdf2excel-table-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pdf2excel-table-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pdf2excel-sheet-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pdf2excel-sheet-stat strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.pdf2excel-search-input {
+  width: 240px;
+  max-width: 100%;
+  height: 34px;
+  padding: 4px 10px;
+  font-size: 12.5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.pdf2excel-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 12px;
+  color: #475569;
+  padding-top: 6px;
+}
+
+@media (max-width: 640px) {
+  .pdf2excel-result-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pdf2excel-btn-bar {
+    flex-direction: column;
+    width: 100%;
+  }
+  .pdf2excel-btn-bar .btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .pdf2excel-search-input {
+    width: 100%;
+  }
+}
+
 
