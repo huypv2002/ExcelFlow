@@ -49,9 +49,175 @@
   if(value.kind==='n'&&Number.isInteger(Number(s))){s=String(Number(s));const styleNum=Number(cell?.getAttribute('s')||0),fmt=styles[styleNum]||'';if(/^0{2,}$/.test(fmt))s=s.padStart(fmt.length,'0');}
   return s.toLocaleLowerCase('vi-VN');
  }
+ function extractLineCells(items, gapThreshold = 9) {
+  if (!items.length) return [];
+  const cells = [];
+  let currentCell = { text: items[0].str, x: items[0].tx, xEnd: items[0].tx + (items[0].width || 0) };
+  for (let i = 1; i < items.length; i++) {
+    const it = items[i];
+    const itWidth = it.width || (it.str.length * 6);
+    const gap = it.tx - currentCell.xEnd;
+    if (gap < gapThreshold) {
+      const needSpace = gap > 2 && !currentCell.text.endsWith(' ') && !it.str.startsWith(' ');
+      currentCell.text += (needSpace ? ' ' : '') + it.str;
+      currentCell.xEnd = Math.max(currentCell.xEnd, it.tx + itWidth);
+    } else {
+      if (currentCell.text.trim()) {
+        cells.push({ text: currentCell.text.trim(), x: currentCell.x, xEnd: currentCell.xEnd });
+      }
+      currentCell = { text: it.str, x: it.tx, xEnd: it.tx + itWidth };
+    }
+  }
+  if (currentCell.text.trim()) {
+    cells.push({ text: currentCell.text.trim(), x: currentCell.x, xEnd: currentCell.xEnd });
+  }
+  return cells;
+ }
+
+ function clusterColumns(allLines) {
+  const allX = [];
+  for (const line of allLines) {
+    for (const cell of line) {
+      allX.push(cell.x);
+    }
+  }
+  allX.sort((a,b) => a - b);
+  const clusters = [];
+  for (const x of allX) {
+    let found = false;
+    for (const cl of clusters) {
+      if (Math.abs(cl.avg - x) <= 20) {
+        cl.points.push(x);
+        cl.avg = cl.points.reduce((a,b)=>a+b,0) / cl.points.length;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      clusters.push({ points: [x], avg: x });
+    }
+  }
+  clusters.sort((a,b) => a.avg - b.avg);
+  const minPoints = Math.max(1, Math.floor(allLines.length * 0.05));
+  const validClusters = clusters.filter(c => c.points.length >= minPoints || clusters.length <= 16);
+  return (validClusters.length ? validClusters : clusters).map(c => c.avg);
+ }
+
+ function gridToXlsxZip(grid) {
+  const zip = new JSZip();
+  const maxRow = Math.max(1, grid.length);
+  const maxCol = Math.max(1, ...grid.map(r => r.length));
+  
+  let rowsXml = '';
+  for (let r = 0; r < grid.length; r++) {
+    const rowNum = r + 1;
+    let cellsXml = '';
+    const row = grid[r];
+    for (let c = 0; c < row.length; c++) {
+      const val = row[c];
+      if (val == null || val === '') continue;
+      const ref = colLetter(c + 1) + rowNum;
+      const sVal = String(val).trim();
+      const isNum = /^[+-]?\d+(?:\.\d+)?$/.test(sVal.replace(/,/g, ''));
+      if (isNum && !/^0\d+/.test(sVal)) {
+        const numVal = sVal.replace(/,/g, '');
+        cellsXml += `<c r="${ref}"><v>${numVal}</v></c>`;
+      } else {
+        const escVal = sVal.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        cellsXml += `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${escVal}</t></is></c>`;
+      }
+    }
+    if (cellsXml) {
+      rowsXml += `<row r="${rowNum}">${cellsXml}</row>`;
+    }
+  }
+
+  zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>');
+  zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+  zip.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>');
+  zip.file('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Bảng PDF" sheetId="1" r:id="rId1"/></sheets></workbook>');
+  zip.file('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="1"><fill><patternFill patternType="none"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>');
+  zip.file('xl/worksheets/sheet1.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:${colLetter(maxCol)}${maxRow}"/><sheetData>${rowsXml}</sheetData></worksheet>`);
+
+  return zip;
+ }
+
+ async function parsePdfToWorkbook(file) {
+  if (typeof window.pdfjsLib === 'undefined') {
+    throw Error('Chưa tải được thư viện PDF (pdf.min.js). Vui lòng làm mới trang.');
+  }
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/pdf.worker.min.js';
+  const arrayBuffer = await file.arrayBuffer();
+  const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const allLines = [];
+
+  for (let p = 1; p <= pdfDoc.numPages; p++) {
+    const page = await pdfDoc.getPage(p);
+    const textContent = await page.getTextContent();
+    const items = (textContent.items || []).filter(it => it.str && it.str.trim());
+    if (!items.length) continue;
+
+    const lineMap = new Map();
+    for (const it of items) {
+      const tx = it.transform[4];
+      const ty = it.transform[5];
+      const width = it.width || (it.str.length * 6);
+      let matchedY = null;
+      for (const y of lineMap.keys()) {
+        if (Math.abs(y - ty) <= 4.0) {
+          matchedY = y;
+          break;
+        }
+      }
+      if (matchedY === null) {
+        lineMap.set(ty, [{ str: it.str, tx, width }]);
+      } else {
+        lineMap.get(matchedY).push({ str: it.str, tx, width });
+      }
+    }
+
+    const sortedYs = Array.from(lineMap.keys()).sort((a,b) => b - a);
+    for (const y of sortedYs) {
+      const lineItems = lineMap.get(y).sort((a,b) => a.tx - b.tx);
+      const cells = extractLineCells(lineItems, 9);
+      if (cells.length) allLines.push(cells);
+    }
+  }
+
+  if (!allLines.length) {
+    throw Error('File PDF "' + file.name + '" không tìm thấy lớp văn bản. Hãy dùng file PDF xuất từ ngân hàng hoặc phần mềm.');
+  }
+
+  const cols = clusterColumns(allLines);
+  const grid = [];
+  for (const line of allLines) {
+    const row = new Array(cols.length).fill('');
+    for (const cell of line) {
+      let bestCol = 0, minDist = Infinity;
+      for (let c = 0; c < cols.length; c++) {
+        const dist = Math.abs(cols[c] - cell.x);
+        if (dist < minDist) {
+          minDist = dist;
+          bestCol = c;
+        }
+      }
+      row[bestCol] = (row[bestCol] ? row[bestCol] + ' ' : '') + cell.text;
+    }
+    grid.push(row);
+  }
+
+  return gridToXlsxZip(grid);
+ }
+
  async function openWorkbook(file){
-  if(!file||!/\.(xlsx|xlsm)$/i.test(file.name))throw Error('Chỉ hỗ trợ .xlsx hoặc .xlsm. Hãy lưu file .xls cũ thành .xlsx trước.');
-  const bytes=await file.arrayBuffer();const zip=await JSZip.loadAsync(bytes);
+  if(!file||!/\.(xlsx|xlsm|pdf)$/i.test(file.name))throw Error('Chỉ hỗ trợ .xlsx, .xlsm hoặc .pdf. Hãy chọn đúng định dạng.');
+  let zip;
+  if(/\.pdf$/i.test(file.name)){
+    zip = await parsePdfToWorkbook(file);
+  } else {
+    const bytes=await file.arrayBuffer();
+    zip=await JSZip.loadAsync(bytes);
+  }
   const workbookFile=zip.file('xl/workbook.xml'),relnFile=zip.file('xl/_rels/workbook.xml.rels');
   if(!workbookFile||!relnFile)throw Error('Không đọc được cấu trúc file Excel (tệp có thể bị khóa mật khẩu).');
   const [workbookXml,relsXml,sharedXml,stylesXml]=await Promise.all([
@@ -104,6 +270,7 @@
   if(srcBook){const sh=await sheetOf(srcBook,el('sourceSheet').value);const sc=getColumns(sh,srcBook,hdr);populateSelect('addSource',sc,true);populateSelect('sourceKey',sc,true);}
   if(dstBook){const sh=await sheetOf(dstBook,el('targetSheet').value);const tc=getColumns(sh,dstBook,dh);populateSelect('addTarget',tc,true);populateSelect('targetKey',tc,true);}
   renderMappingList();
+  if(srcBook&&dstBook&&typeof window.efAutoMapColumns==='function'){window.efAutoMapColumns();}
  }catch(e){message(e.message,'err');}}
  function invalidate(){plan=null;planSettings=null;el('exportBtn').disabled=true;el('previewLabel').textContent='Chưa phân tích';el('statChanges').textContent='0';el('statRows').textContent='0';el('statSkipped').textContent='0';el('showSkipped').disabled=true;el('skipDetails').hidden=true;el('skipQuickText').textContent='Sau khi xem trước, bạn có thể biết chính xác dòng hoặc ô nào không được nhập.';el('downloadSkips').disabled=true;el('previewTable').style.display='none';el('noPreview').style.display='block';el('reconDownload').disabled=true;el('reconBadge').textContent='Cần phân tích lại';el('reconBadge').classList.remove('warn');el('reconTable').innerHTML='';el('reconDifferences').innerHTML='';el('reconRows').textContent='0';el('reconMismatches').textContent='0';el('reconPairs').textContent='0';el('reconStatus').textContent='Các quy tắc đã thay đổi. Hãy xem trước dữ liệu một lần nữa để tính đối chiếu chính xác.';el('reconStatus').className='status warn';el('fileResults').style.display='none';}
  function num(str,name){const n=Number(str);if(!Number.isInteger(n)||n<1||n>1048576)throw Error(name+' phải là số nguyên từ 1 đến 1048576.');return n;}
@@ -854,7 +1021,7 @@
   let added=0,ignored=0,errors=[];const seen=new Set(srcEntries.map(e=>fileIdentity(e.file)));
   try{
    for(const file of files){
-    if(!/\.(xlsx|xlsm)$/i.test(file.name)){errors.push(file.name+': chỉ nhận .xlsx hoặc .xlsm');continue;}
+    if(!/\.(xlsx|xlsm|pdf)$/i.test(file.name)){errors.push(file.name+': chỉ nhận .xlsx, .xlsm hoặc .pdf');continue;}
     if(seen.has(fileIdentity(file))){ignored++;continue;}
     try{
      message('Đang đọc file '+file.name+' ('+(added+1)+'/'+files.length+')…');await sleep();const book=await openWorkbook(file);

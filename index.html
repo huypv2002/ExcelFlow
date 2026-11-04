@@ -107,12 +107,12 @@
 <div class="ef-workspace">
 <section class="ef-card ef-files" id="efFiles">
   <div class="ef-card-heading"><span class="ef-icon">▤</span><h2>File nguồn <small>(nhiều file)</small></h2></div>
-  <div aria-label="Kéo thả file Excel nguồn hoặc bấm chọn" class="filebox dropzone" id="sourceDrop" role="group" tabindex="0">
-<div class="drop-main"><span class="drop-ico">↧</span><span><strong>Thả nhiều file sao kê vào đây</strong><small>Chọn nhiều file một lượt hoặc thêm file lần sau</small></span></div>
-<input accept=".xlsx,.xlsm" aria-label="Chọn nhiều file dữ liệu nguồn" id="sourceFile" multiple="" type="file"/><div aria-live="polite" class="filename" id="srcName">Chưa chọn file nguồn</div>
+  <div aria-label="Kéo thả file Excel hoặc PDF nguồn hoặc bấm chọn" class="filebox dropzone" id="sourceDrop" role="group" tabindex="0">
+<div class="drop-main"><span class="drop-ico">↧</span><span><strong>Thả nhiều file sao kê (Excel, PDF) vào đây</strong><small>Hỗ trợ file Excel .xlsx, .xlsm và file sao kê .pdf</small></span></div>
+<input accept=".xlsx,.xlsm,.pdf" aria-label="Chọn nhiều file dữ liệu nguồn (Excel, PDF)" id="sourceFile" multiple="" type="file"/><div aria-live="polite" class="filename" id="srcName">Chưa chọn file nguồn</div>
 </div>
   <div class="source-toolbar"><div><strong id="sourceFileCount">0 file nguồn</strong><p class="helper">Thứ tự từ trên xuống là thứ tự nhập. Dùng ↑ ↓ để đổi vị trí các tháng.</p></div><button class="btn" disabled="" id="clearSources" type="button">Xóa tất cả nguồn</button></div>
-  <div class="source-list" id="sourceList"><div class="source-list-empty">Chưa có file nguồn. Kéo nhiều file Excel vào khung phía trên.</div></div>
+  <div class="source-list" id="sourceList"><div class="source-list-empty">Chưa có file nguồn. Kéo nhiều file Excel hoặc PDF vào khung phía trên.</div></div>
   <div class="ef-card-heading ef-target-heading"><span class="ef-icon">▣</span><h2>File đích <small>(1 file)</small></h2></div>
   <div aria-label="Kéo thả file Excel cần điền hoặc bấm chọn" class="filebox dropzone" id="targetDrop" role="group" tabindex="0">
 <div class="drop-main"><span class="drop-ico">↧</span><span><strong>Thả file Excel cần nhập</strong><small>Giữ nguyên file gốc và công thức</small></span></div>
@@ -142,8 +142,20 @@
 <div class="field"><label for="addType">KIỂU DỮ LIỆU</label><select id="addType"><option value="auto">Giữ nguyên</option><option value="text">Văn bản / mã GD</option><option value="date">Ngày DD/MM/YYYY</option><option value="datetime">Ngày và giờ</option><option value="money">Số tiền VNĐ</option><option value="integer">Số nguyên</option><option value="decimal">Số thập phân</option><option value="percent">Phần trăm</option></select></div>
 <button class="btn primary" id="addPair" type="button">+ Thêm cặp cột này</button>
 </div></div>
-  <div class="ef-template-controls"><label for="efTemplateSelect">Mẫu ghép đã lưu</label><select id="efTemplateSelect"><option value="">Chọn mẫu để áp dụng</option></select><details class="adv-details" id="mappingDetails"><summary>▸ Tôi muốn nhập hoặc sửa quy tắc bằng chữ cột</summary><div class="adv-body"><p class="helper" style="margin:0 0 9px">Mỗi dòng một cặp: <b>D → A</b> hoặc <b>M → F</b>. Ký tự D, M là cột trong file nguồn; A, F là cột file đích.</p><div class="field"><label for="mapping">Các cặp nguồn → đích</label><textarea id="mapping" placeholder="D -&gt; A
-M -&gt; F" spellcheck="false"></textarea></div></div></details></div>
+  <div class="ef-template-controls">
+    <div class="ef-preset-bar">
+      <div class="field-preset-select">
+        <label for="efTemplateSelect">Bộ mẫu ghép:</label>
+        <select id="efTemplateSelect"><option value="">-- Chọn bộ mẫu để áp dụng --</option></select>
+      </div>
+      <div class="ef-preset-btn-group">
+        <button type="button" class="btn small" id="efSaveCurrentPreset" title="Lưu nhanh quy tắc ghép hiện tại thành một bộ mới">💾 Lưu bộ hiện tại</button>
+        <button type="button" class="btn small outline" id="efOpenPresetManager" title="Mở danh sách quản lý, thêm, sửa, xóa và tìm kiếm các bộ mẫu">⚙ Quản lý các bộ</button>
+      </div>
+    </div>
+    <details class="adv-details" id="mappingDetails"><summary>▸ Tôi muốn nhập hoặc sửa quy tắc bằng chữ cột</summary><div class="adv-body"><p class="helper" style="margin:0 0 9px">Mỗi dòng một cặp: <b>D → A</b> hoặc <b>M → F</b>. Ký tự D, M là cột trong file nguồn; A, F là cột file đích.</p><div class="field"><label for="mapping">Các cặp nguồn → đích</label><textarea id="mapping" placeholder="D -&gt; A
+M -&gt; F" spellcheck="false"></textarea></div></div></details>
+  </div>
 </section>
 <aside class="ef-card ef-audit" id="efAudit">
   <div class="ef-card-heading"><span class="ef-icon">⚖</span><h2>Đối chiếu</h2></div>
@@ -232,7 +244,9 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
 </div>
 <script src="js/approval.js"></script>
 <script src="js/jszip.min.js"></script>
+<script src="js/pdf.min.js"></script>
 <script src="js/excel-engine.js"></script>
+<script src="js/preset-manager.js"></script>
 <script src="js/preview.js"></script>
 <script src="js/search-crud.js"></script>
 <script src="js/home.js"></script>
