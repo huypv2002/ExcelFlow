@@ -161,9 +161,11 @@
 /* Lưới các nút chức năng (Minimal Button Grid) */
 .ef-button-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
   width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 /* Thẻ nút bấm */

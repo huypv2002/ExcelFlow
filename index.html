@@ -19,6 +19,7 @@
     <nav class="ef-main-nav">
       <button id="navHomeTab" class="ef-nav-tab active" type="button" data-nav-home>Trang chủ</button>
       <button id="navImport" class="ef-nav-tab" type="button" data-nav-import>Ghép &amp; Nhập liệu</button>
+      <button id="navMerger" class="ef-nav-tab" type="button">Gộp nhiều file</button>
       <button id="navPdf2Excel" class="ef-nav-tab" type="button">Chuyển PDF sang Excel</button>
       <button id="navHistory" class="ef-nav-tab" type="button"><span class="ef-clock">◷</span> Lịch sử</button>
     </nav>
@@ -46,46 +47,16 @@
         <span class="ef-card-name">Ghép &amp; Đối chiếu Excel</span>
       </button>
 
-      <!-- Nút 2: Gộp nhiều file -->
-      <button type="button" class="ef-btn-card" data-app-id="merger" data-app-title="Gộp nhiều file">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">Gộp nhiều file</span>
+      <!-- Nút 2: Gộp nhiều file (Active) -->
+      <button type="button" class="ef-btn-card is-active" data-app-id="merger" data-app-title="Gộp nhiều file (Excel &amp; PDF)">
+        <span class="ef-card-badge">Sẵn sàng</span>
+        <span class="ef-card-name">Gộp nhiều file (Excel &amp; PDF)</span>
       </button>
 
-      <!-- Nút 3: Tách file -->
-      <button type="button" class="ef-btn-card" data-app-id="splitter" data-app-title="Tách file">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">Tách file</span>
-      </button>
-
-      <!-- Nút 4: So sánh 2 file -->
-      <button type="button" class="ef-btn-card" data-app-id="diff" data-app-title="So sánh 2 file">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">So sánh 2 file</span>
-      </button>
-
-      <!-- Nút 5: Làm sạch dữ liệu -->
-      <button type="button" class="ef-btn-card" data-app-id="cleaner" data-app-title="Làm sạch dữ liệu">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">Làm sạch dữ liệu</span>
-      </button>
-
-      <!-- Nút 6: Chuyển từ PDF sang Excel -->
+      <!-- Nút 3: Chuyển từ PDF sang Excel (Active) -->
       <button type="button" class="ef-btn-card is-active" data-app-id="pdf2excel" data-app-title="Chuyển từ PDF sang Excel">
         <span class="ef-card-badge">Sẵn sàng</span>
         <span class="ef-card-name">Chuyển từ PDF sang Excel</span>
-      </button>
-
-      <!-- Nút 7: Tra cứu dữ liệu -->
-      <button type="button" class="ef-btn-card" data-app-id="lookup" data-app-title="Tra cứu dữ liệu">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">Tra cứu dữ liệu</span>
-      </button>
-
-      <!-- Nút 8: Kiểm tra công thức -->
-      <button type="button" class="ef-btn-card" data-app-id="doctor" data-app-title="Kiểm tra công thức">
-        <span class="ef-card-badge muted">Sắp có</span>
-        <span class="ef-card-name">Kiểm tra công thức</span>
       </button>
     </div>
   </div>
@@ -307,6 +278,142 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
     </div>
   </div>
 </section>
+
+<!-- ================= GỘP NHIỀU FILE (EXCEL & PDF) ================= -->
+<section id="mergerPage" class="section">
+  <div class="ef-page-breadcrumb">
+    <button type="button" class="ef-back-home-btn" data-nav-home>← Quay lại Trang chủ Workspace</button>
+    <span class="ef-badge-active-tool">Công cụ đang mở: Gộp nhiều file (Excel &amp; PDF)</span>
+  </div>
+
+  <div class="merger-container">
+    <div class="merger-header">
+      <div class="merger-title-wrap">
+        <h2>Gộp nhiều file dữ liệu (Excel &amp; PDF)</h2>
+        <p class="helper">Tự động gom và ghép các bảng cùng loại (bảng kê mua vào, bán ra, giấy báo có, giấy báo nợ...) hoặc nối tiếp dòng vào một file duy nhất.</p>
+      </div>
+    </div>
+
+    <!-- Khung chọn file -->
+    <div class="ef-card merger-upload-card">
+      <div class="dropzone merger-dropzone" id="mergerDrop">
+        <input type="file" id="mergerFileInput" multiple accept=".xlsx,.xlsm,.pdf" style="display:none" />
+        <div class="merger-drop-icon">▤</div>
+        <div class="merger-drop-text">
+          <strong>Kéo thả nhiều file Excel (.xlsx, .xlsm) hoặc PDF vào đây</strong>
+          <span>hoặc bấm để chọn nhiều file cùng lúc từ máy tính</span>
+        </div>
+        <button type="button" class="btn primary" id="mergerBrowseBtn">Chọn nhiều file</button>
+      </div>
+
+      <!-- Danh sách các file đã chọn -->
+      <div class="merger-files-section" id="mergerFilesSection" style="display:none">
+        <div class="merger-files-header">
+          <div class="merger-files-count">Danh sách file đã chọn (<strong id="mergerFileCount">0</strong> file)</div>
+          <button type="button" class="btn small outline danger" id="mergerClearAllBtn">✕ Xóa tất cả</button>
+        </div>
+        <div class="merger-file-list" id="mergerFileList"></div>
+      </div>
+    </div>
+
+    <!-- Tùy chọn gộp -->
+    <div class="ef-card merger-config-card" id="mergerConfigCard" style="display:none">
+      <div class="merger-config-head">
+        <span class="merger-config-tag">Tùy chọn gộp thông minh</span>
+      </div>
+      <div class="merger-config-grid">
+        <div class="field">
+          <label for="mergerFormatSelect">Định dạng file xuất ra:</label>
+          <select id="mergerFormatSelect">
+            <option value="xlsx">Bảng tính Excel (.xlsx)</option>
+            <option value="pdf" id="mergerPdfOption" disabled>Tài liệu PDF (.pdf - Khi toàn bộ là file PDF)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mergerModeSelect">Chế độ gộp dữ liệu:</label>
+          <select id="mergerModeSelect">
+            <option value="category">Gom theo loại bảng kê (Mua vào, Bán ra, Báo có, Báo nợ...) [Khuyên dùng]</option>
+            <option value="append">Gộp nối tiếp toàn bộ dòng vào 1 bảng duy nhất</option>
+            <option value="sheets">Mỗi file / bảng thành 1 sheet riêng biệt</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="merger-options-toggles">
+        <label class="switch">
+          <input type="checkbox" id="mergerSkipHeaders" checked>
+          <span class="switch-track"></span>
+          <span>Bỏ dòng tiêu đề lặp lại giữa các file</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="mergerSkipTotals" checked>
+          <span class="switch-track"></span>
+          <span>Bỏ dòng tổng cộng giữa chừng (Cộng, Tổng cộng...)</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="mergerReindexStt" checked>
+          <span class="switch-track"></span>
+          <span>Đánh lại số thứ tự liên tục (STT 1..N)</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="mergerAddFileNameCol">
+          <span class="switch-track"></span>
+          <span>Thêm cột tên file nguồn</span>
+        </label>
+      </div>
+
+      <div class="merger-actions-bar">
+        <button type="button" class="btn primary-action teal" id="mergerProcessBtn">⌕ Xem trước dữ liệu gộp</button>
+      </div>
+    </div>
+
+    <!-- Kết quả & Xem trước -->
+    <div class="ef-card merger-result-card" id="mergerResultCard" style="display:none">
+      <div class="merger-result-topbar">
+        <div class="merger-result-meta">
+          <span class="merger-result-badge" id="mergerResultBadge">Excel (.xlsx)</span>
+          <h3 id="mergerResultTitle">Gộp dữ liệu hoàn tất</h3>
+          <p class="helper" id="mergerResultSummary">Đã gộp thành công</p>
+        </div>
+        <div class="merger-result-btns">
+          <button type="button" class="btn teal primary-action" id="mergerDownloadBtn">⇩ Tải file gộp (.xlsx)</button>
+          <button type="button" class="btn primary" id="mergerSendToImportBtn" title="Chuyển file gộp này sang làm file nguồn cho Ghép & Nhập liệu">⇄ Đưa sang Ghép &amp; Nhập liệu</button>
+          <button type="button" class="btn outline" id="mergerResetBtn">✕ Làm mới</button>
+        </div>
+      </div>
+
+      <!-- Sheet Tabs nếu có nhiều sheet -->
+      <div class="merger-sheet-tabs" id="mergerSheetTabs" style="display:none"></div>
+
+      <!-- Bảng dữ liệu xem trước -->
+      <div class="merger-table-container" id="mergerTableContainer">
+        <div class="merger-table-filter-bar">
+          <div class="merger-sheet-stat">
+            <strong id="mergerActiveSheetTitle">Bảng 1</strong>
+            <span class="muted" id="mergerActiveSheetStats">0 dòng · 0 cột</span>
+          </div>
+          <div class="merger-search-box">
+            <input type="text" id="mergerSearchInput" placeholder="Tìm kiếm trong bảng gộp..." />
+          </div>
+        </div>
+        <div class="preview-area" id="mergerTableArea" style="max-height: 480px; overflow: auto;"></div>
+        <div class="merger-pagination-bar" id="mergerPaginationBar">
+          <button type="button" class="btn small" id="mergerPrevPage">‹ Trước</button>
+          <span id="mergerPageNumber">Trang 1 / 1</span>
+          <button type="button" class="btn small" id="mergerNextPage">Tiếp ›</button>
+        </div>
+      </div>
+
+      <!-- Xem trước cho trường hợp ghép PDF sang PDF -->
+      <div class="merger-pdf-preview" id="mergerPdfPreview" style="display:none">
+        <div class="merger-pdf-info-box">
+          <h4>✓ Đã ghép các file PDF thành một tệp hoàn chỉnh</h4>
+          <p id="mergerPdfStats">Tổng cộng: 0 file, 0 trang.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="section" id="comparePage"><button type="button" class="ef-page-return" data-return-home>← Về trang nhập liệu</button>
 <div class="top"><div><h1>Đối chiếu số liệu trước khi nhập</h1><p class="sub">So tổng số liệu giữa 2 file theo các cột và dòng bạn đã ghép, trước và sau khi nhập dự kiến.</p></div><span class="pill" id="reconBadge">Chưa đối chiếu</span></div>
 <div class="panel"><div class="hrow"><div><h2 style="margin-bottom:7px">Bảng đối chiếu theo cặp cột</h2><p class="helper">Bảng tính chỉ cộng các giá trị số ở những dòng đã ghép; không tự tính lại công thức Excel.</p></div><div class="actions"><button class="btn primary" id="goPreview">↗ Về trang nhập / xem trước</button><button class="btn" disabled="" id="reconDownload">⇩ Xuất CSV đối chiếu</button></div></div>
@@ -337,12 +444,14 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
 <script src="js/approval.js"></script>
 <script src="js/jszip.min.js"></script>
 <script src="js/pdf.min.js"></script>
+<script src="js/pdf-lib.min.js"></script>
 <script src="js/excel-engine.js"></script>
 <script src="js/preset-manager.js"></script>
 <script src="js/preview.js"></script>
 <script src="js/search-crud.js"></script>
 <script src="js/home.js"></script>
 <script src="js/pdf2excel.js"></script>
+<script src="js/merger.js"></script>
 
 
 </body></html>

@@ -198,6 +198,7 @@
  function gridToXlsxZip(grid) {
   return sheetsToXlsxZip([{ name: 'Bảng PDF', grid }]);
  }
+ window.efSheetsToXlsxZip = sheetsToXlsxZip;
 
  async function parsePdfToWorkbook(file) {
   if (typeof window.pdfjsLib === 'undefined') {
@@ -470,7 +471,8 @@
     'stt', 'serial', 'số', 'so', 'ngày', 'ngay', 'date', 'tên', 'ten', 'khách', 'khach',
     'mst', 'mã', 'ma', 'tiền', 'tien', 'thuế', 'thue', 'tổng', 'tong', 'nội dung', 'noi dung',
     'diễn giải', 'dien giai', 'hóa đơn', 'hoa don', 'mặt hàng', 'mat hang', 'tk', 'tài khoản',
-    'đối tác', 'doi tac', 'đơn vị', 'don vi', 'doanh số', 'doanh so'
+    'đối tác', 'doi tac', 'đơn vị', 'don vi', 'doanh số', 'doanh so', 'thuế suất', 'thue suat',
+    'doanh thu', 'ghi chú', 'ghi chu'
   ];
   let bestRow = 1, maxScore = -1;
   const limit = Math.min(sheet.maxRow || 35, maxScan);
@@ -1250,13 +1252,14 @@
 
  // Events and offline initialization.
  function goPage(which){
-   const history=which==='history',compare=which==='compare',home=which==='home',pdf2excel=which==='pdf2excel';
-   const isImport=!history&&!compare&&!home&&!pdf2excel;
+   const history=which==='history',compare=which==='compare',home=which==='home',pdf2excel=which==='pdf2excel',merger=which==='merger';
+   const isImport=!history&&!compare&&!home&&!pdf2excel&&!merger;
    el('homePage')?.classList.toggle('active',home);
    el('importPage')?.classList.toggle('active',isImport);
    el('comparePage')?.classList.toggle('active',compare);
    el('historyPage')?.classList.toggle('active',history);
    el('pdf2ExcelPage')?.classList.toggle('active',pdf2excel);
+   el('mergerPage')?.classList.toggle('active',merger);
 
    // Ẩn thanh header hoàn toàn khi ở Trang chủ
    if(el('efHeader')) el('efHeader').style.display = home ? 'none' : 'flex';
@@ -1264,6 +1267,7 @@
    el('navHome')?.classList.toggle('active',home);
    el('navHomeTab')?.classList.toggle('active',home);
    el('navImport')?.classList.toggle('active',isImport);
+   el('navMerger')?.classList.toggle('active',merger);
    el('navPdf2Excel')?.classList.toggle('active',pdf2excel);
    el('navCompare')?.classList.toggle('active',compare);
    el('navHistory')?.classList.toggle('active',history);
@@ -1279,11 +1283,13 @@
  el('navHome')?.addEventListener('click',()=>goPage('home'));
  el('navHomeTab')?.addEventListener('click',()=>goPage('home'));
  el('navImport')?.addEventListener('click',()=>goPage('import'));
+ el('navMerger')?.addEventListener('click',()=>goPage('merger'));
  el('navPdf2Excel')?.addEventListener('click',()=>goPage('pdf2excel'));
  el('navCompare')?.addEventListener('click',()=>goPage('compare'));
  el('navHistory')?.addEventListener('click',()=>goPage('history'));
  document.querySelectorAll('[data-nav-home]').forEach(btn=>btn.addEventListener('click',()=>goPage('home')));
  document.querySelectorAll('[data-nav-import]').forEach(btn=>btn.addEventListener('click',()=>goPage('import')));
+ document.querySelectorAll('[data-nav-merger]').forEach(btn=>btn.addEventListener('click',()=>goPage('merger')));
  document.querySelectorAll('[data-nav-pdf2excel]').forEach(btn=>btn.addEventListener('click',()=>goPage('pdf2excel')));
  // Source files are additive; only the destination remains a single file.
  const fileVersions={source:0,target:0};
@@ -1325,7 +1331,13 @@
         if (br) el('sourceSheet').value = br.name;
       }
     }
-    el('sourceSheet').value=srcEntries[0].sheet;
+    if (srcEntries[0]) {
+      if (el('sourceSheet').value) {
+        srcEntries[0].sheet = el('sourceSheet').value;
+      } else {
+        el('sourceSheet').value = srcEntries[0].sheet;
+      }
+    }
     await autoDetectAndSetSourceHeader();
   }
   else {

@@ -36,6 +36,14 @@
             const navImport = document.getElementById('navImport');
             if (navImport) navImport.click();
           }
+        } else if (appId === 'merger') {
+          // Mở công cụ Gộp nhiều file
+          if (typeof window.efGoPage === 'function') {
+            window.efGoPage('merger');
+          } else {
+            const navMerger = document.getElementById('navMerger');
+            if (navMerger) navMerger.click();
+          }
         } else if (appId === 'pdf2excel') {
           // Mở công cụ Chuyển từ PDF sang Excel
           if (typeof window.efGoPage === 'function') {
