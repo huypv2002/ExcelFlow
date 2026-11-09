@@ -139,6 +139,54 @@
   }).filter(Boolean).join(' ');
  }
 
+ function assembleVcbDetailText(items) {
+  if (!items || !items.length) return '';
+  const sorted = [...items].sort((a, b) => a.vy - b.vy || a.vx - b.vx);
+  const sublines = [];
+  let curSub = [];
+  let curY = null;
+  for (const it of sorted) {
+    if (curY === null || Math.abs(it.vy - curY) > 3.5) {
+      if (curSub.length) sublines.push(curSub);
+      curSub = [it];
+      curY = it.vy;
+    } else {
+      curSub.push(it);
+    }
+  }
+  if (curSub.length) sublines.push(curSub);
+
+  const builtLines = sublines.map(line => {
+    line.sort((a, b) => a.vx - b.vx);
+    let lineStr = '';
+    let maxXEnd = 0;
+    for (let i = 0; i < line.length; i++) {
+      const it = line[i];
+      const xEnd = it.vx + (it.w || 0);
+      if (xEnd > maxXEnd) maxXEnd = xEnd;
+      if (i > 0) {
+        const prev = line[i - 1];
+        const gap = it.vx - (prev.vx + (prev.w || 0));
+        if (gap >= 2 && !lineStr.endsWith(' ') && !it.str.startsWith(' ')) {
+          lineStr += ' ';
+        }
+      }
+      lineStr += it.str;
+    }
+    return { text: lineStr.replace(/\s+/g, ' ').trim(), maxXEnd };
+  }).filter(l => l.text);
+
+  if (!builtLines.length) return '';
+  let result = builtLines[0].text;
+  for (let i = 1; i < builtLines.length; i++) {
+    const prev = builtLines[i - 1];
+    const cur = builtLines[i];
+    const isHardWrappedToken = !prev.text.includes(' ') && prev.maxXEnd >= 555.5 && !/^526186410\b/.test(cur.text);
+    result += (isHardWrappedToken ? '' : ' ') + cur.text;
+  }
+  return result;
+ }
+
  function sheetsToXlsxZip(sheetsInput) {
   const zip = new JSZip();
   const sheets = Array.isArray(sheetsInput) && sheetsInput.length && sheetsInput[0].grid
@@ -158,9 +206,20 @@
     const maxRow = Math.max(1, grid.length);
     const maxCol = Math.max(1, ...grid.map(r => r.length));
 
+    const colWidths = new Array(maxCol).fill(10);
+    for (let r = 0; r < Math.min(grid.length, 300); r++) {
+      const row = grid[r] || [];
+      for (let c = 0; c < row.length; c++) {
+        const len = String(row[c] ?? '').trim().length;
+        if (len + 4 > colWidths[c]) colWidths[c] = Math.min(65, len + 4);
+      }
+    }
+    const colsXml = '<cols>' + colWidths.map((w, idx) => `<col min="${idx + 1}" max="${idx + 1}" width="${w}" customWidth="1"/>`).join('') + '</cols>';
+
     let rowsXml = '';
     for (let r = 0; r < grid.length; r++) {
       const rowNum = r + 1;
+      const styleIdx = r === 0 ? 1 : 2;
       let cellsXml = '';
       const row = grid[r];
       for (let c = 0; c < row.length; c++) {
@@ -169,14 +228,14 @@
         const ref = colLetter(c + 1) + rowNum;
         const sVal = String(val).trim();
         const escVal = sVal.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-        cellsXml += `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${escVal}</t></is></c>`;
+        cellsXml += `<c r="${ref}" s="${styleIdx}" t="inlineStr"><is><t xml:space="preserve">${escVal}</t></is></c>`;
       }
       if (cellsXml) {
         rowsXml += `<row r="${rowNum}">${cellsXml}</row>`;
       }
     }
 
-    zip.file(`xl/worksheets/sheet${sId}.xml`, `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:${colLetter(maxCol)}${maxRow}"/><sheetData>${rowsXml}</sheetData></worksheet>`);
+    zip.file(`xl/worksheets/sheet${sId}.xml`, `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:${colLetter(maxCol)}${maxRow}"/>${colsXml}<sheetData>${rowsXml}</sheetData></worksheet>`);
     contentTypesOverride += `<Override PartName="/xl/worksheets/sheet${sId}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
     relsEntries += `<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${sId}.xml"/>`;
     wbSheets += `<sheet name="${sheetInfo.name.replace(/[&<>"']/g, '')}" sheetId="${sId}" r:id="${rId}"/>`;
@@ -190,7 +249,7 @@
   zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
   zip.file('xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relsEntries}</Relationships>`);
   zip.file('xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${wbSheets}</sheets></workbook>`);
-  zip.file('xl/styles.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="1"><fill><patternFill patternType="none"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>`);
+  zip.file('xl/styles.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE2E8F0"/></patternFill></fill></fills><borders count="2"><border/><border><left style="thin"><color rgb="FFCBD5E1"/></left><right style="thin"><color rgb="FFCBD5E1"/></right><top style="thin"><color rgb="FFCBD5E1"/></top><bottom style="thin"><color rgb="FFCBD5E1"/></bottom></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf></cellXfs></styleSheet>`);
 
   return zip;
  }
@@ -219,14 +278,19 @@
     for (const it of (content.items || [])) {
       if (!it.str || !it.str.trim()) continue;
       // Lọc bỏ barcode ẩn và số trang chân trang
-      if (it.str.includes('TCT-BARCODE') || /Trang\s+\d+\/\d+/i.test(it.str)) continue;
+      if (it.str.includes('TCT-BARCODE') || /Trang\s+\d+\/\d+|\/?\s*Page\s+\d+\s+of\s+\d+/i.test(it.str)) continue;
       const [vx, vy] = viewport.convertToViewportPoint(it.transform[4], it.transform[5]);
       if (vy < 30) continue; // Khu vực barcode lề trên
-      const itemObj = { str: it.str, vx: Math.round(vx), vy: Math.round(vy), w: Math.round(it.width || (it.str.length * 6)) };
+      const itemObj = {
+        str: it.str,
+        vx: Math.round(vx * 10) / 10,
+        vy: Math.round(vy * 10) / 10,
+        w: Math.round((it.width || (it.str.length * 6)) * 10) / 10
+      };
       items.push(itemObj);
       fullPdfText += ' ' + it.str;
     }
-    pagesData.push({ p, items });
+    pagesData.push({ p, items, vpHeight: viewport.height || 842 });
   }
 
   // Nhận diện tệp Tờ khai thuế GTGT có bảng kê bán ra (01-1) và mua vào (01-2)
@@ -356,6 +420,128 @@
     }
   }
 
+  // 2. Nhận diện & Gộp ô cho PDF Sao kê ngân hàng (Vietcombank / VCB DigiBiz & Sao kê đa dòng)
+  const hasBankStatementHeaders = /SAO KÊ TÀI KHOẢN|ACCOUNT STATEMENT|SAO KÊ CHI TIẾT|Số tiền ghi nợ|Số tiền ghi có|Nội dung chi tiết|Transaction In Detail|VCB DigiBiz/i.test(fullPdfText);
+  if (hasBankStatementHeaders) {
+    const bankHeader = ['STT', 'Ngày giao dịch', 'Số CT', 'Số tiền ghi nợ', 'Số tiền ghi có', 'Số dư', 'Nội dung chi tiết'];
+    const gridBank = [bankHeader];
+
+    for (const pd of pagesData) {
+      const items = pd.items;
+      let headerBottomY = 0;
+      for (const it of items) {
+        const s = it.str.trim();
+        if (it.vy < 430 && (/^(Số CT|\/?\s*Doc No|Transaction In Detail|Nội dung chi tiết|Debit|Credit|Balance|TXN Date)$/i.test(s) || /Số CT|Doc No|Transaction In Detail|Nội dung chi tiết/i.test(s))) {
+          if (it.vy > headerBottomY) headerBottomY = it.vy;
+        }
+      }
+      if (!headerBottomY) continue;
+
+      let footerTopY = (pd.vpHeight || 842) - 15;
+      for (const it of items) {
+        const s = it.str.trim();
+        if (it.vy > headerBottomY && (/^(Tổng số|\/?\s*Total|Số dư cuối kỳ|\/?\s*Closing Balance|Bằng chữ|\/?\s*In words|Xác nhận của ngân hàng|\/?\s*Bank's Confirmation|Trân trọng cảm ơn|Postal address|Ghi chú:|Note:)/i.test(s) || (it.vx < 60 && /^(Tổng|Cộng|Ghi chú)/i.test(s)))) {
+          if (it.vy - 8 < footerTopY) footerTopY = it.vy - 8;
+        }
+      }
+
+      const tableItems = items.filter(it =>
+        it.vy > headerBottomY + 4 &&
+        it.vy < footerTopY &&
+        !/Postal address|Telex\s*:|Swift\s*:|Website:|Contact center:|198 TRAN QUANG KHAI/i.test(it.str)
+      );
+
+      const sttItems = tableItems
+        .filter(it => it.vx >= 20 && it.vx < 62 && /^\d{1,6}$/.test(it.str.trim()))
+        .sort((a, b) => a.vy - b.vy);
+
+      if (!sttItems.length) continue;
+
+      // Xác định ranh giới dòng chính xác giữa các giao dịch liền kề để gộp toàn bộ các dòng phụ vào 1 hàng
+      const rowBounds = [];
+      for (let i = 0; i < sttItems.length; i++) {
+        const curY = sttItems[i].vy;
+        let minY;
+        if (i === 0) {
+          minY = headerBottomY + 4;
+        } else {
+          minY = rowBounds[i - 1].maxY;
+        }
+
+        let maxY;
+        if (i === sttItems.length - 1) {
+          maxY = footerTopY;
+        } else {
+          const nextY = sttItems[i + 1].vy;
+          const betweenYs = tableItems
+            .filter(it => it.vy >= curY - 2 && it.vy <= nextY + 2)
+            .map(it => it.vy)
+            .sort((a, b) => a - b);
+          let bestGap = 0;
+          let bestMid = (curY + nextY) / 2;
+          for (let k = 0; k < betweenYs.length - 1; k++) {
+            const gap = betweenYs[k + 1] - betweenYs[k];
+            if (gap > bestGap) {
+              bestGap = gap;
+              bestMid = (betweenYs[k] + betweenYs[k + 1]) / 2;
+            }
+          }
+          maxY = bestGap >= 14 ? bestMid : (curY + nextY) / 2;
+        }
+        rowBounds.push({ minY, maxY });
+      }
+
+      for (let i = 0; i < sttItems.length; i++) {
+        const { minY, maxY } = rowBounds[i];
+        const rowItems = tableItems.filter(it => it.vy >= minY && it.vy < maxY);
+        const sttVal = sttItems[i].str.trim();
+
+        // Cột Ngày giao dịch & Số CT (x: 62 .. 135)
+        const col2Items = rowItems.filter(it => it.vx >= 62 && it.vx < 135).sort((a, b) => a.vy - b.vy || a.vx - b.vx);
+        const dateItem = col2Items.find(it => /^\d{2}\/\d{2}\/\d{4}$/.test(it.str.trim()));
+        const dateVal = dateItem ? dateItem.str.trim() : '';
+        const docNoVal = col2Items
+          .filter(it => it !== dateItem)
+          .map(it => it.str.trim())
+          .filter(Boolean)
+          .join(' ');
+
+        // Cột Số tiền ghi nợ / Debit (x: 135 .. 212)
+        const debitVal = rowItems
+          .filter(it => it.vx >= 135 && it.vx < 212)
+          .sort((a, b) => a.vx - b.vx)
+          .map(it => it.str.trim())
+          .join('');
+
+        // Cột Số tiền ghi có / Credit (x: 212 .. 290)
+        const creditVal = rowItems
+          .filter(it => it.vx >= 212 && it.vx < 290)
+          .sort((a, b) => a.vx - b.vx)
+          .map(it => it.str.trim())
+          .join('');
+
+        // Cột Số dư / Balance (x: 290 .. 372)
+        const balanceVal = rowItems
+          .filter(it => it.vx >= 290 && it.vx < 372)
+          .sort((a, b) => a.vx - b.vx)
+          .map(it => it.str.trim())
+          .join('');
+
+        // Cột Nội dung chi tiết / Transaction In Detail (x >= 372)
+        const detailVal = assembleVcbDetailText(rowItems.filter(it => it.vx >= 372));
+
+        gridBank.push([sttVal, dateVal, docNoVal, debitVal, creditVal, balanceVal, detailVal]);
+      }
+    }
+
+    if (gridBank.length > 1) {
+      const bankSheets = [{ name: 'Sao kê ngân hàng', grid: gridBank }];
+      const zip = sheetsToXlsxZip(bankSheets);
+      zip._sheets = bankSheets;
+      return zip;
+    }
+  }
+
   // 3. Fallback cho PDF sao kê ngân hàng hoặc tài liệu thông thường
   const allLines = [];
   for (const pd of pagesData) {
@@ -443,8 +629,27 @@
    const rowNum=Number(row.getAttribute('r'));if(!rowNum)continue;rows.set(rowNum,row);maxRow=Math.max(maxRow,rowNum);
    for(const c of xmlChildren(row,'c')){const ref=c.getAttribute('r')||'';const col=colFromAddress(ref);if(!col)continue;cells.set(ref.toUpperCase(),c);colNums.add(col);maxCol=Math.max(maxCol,col);}
   }
+  // Tự động dọn các dòng "ví dụ minh họa" trong file mẫu nhập khẩu (như Sao_ke_ngan_hang.xlsx của ASP Kế Toán)
+  let topIntroText='';
+  for(let r=1;r<=Math.min(6,maxRow);r++){
+   const rNode=rows.get(r);if(!rNode)continue;
+   for(const c of xmlChildren(rNode,'c')){
+    const sv=readString(c,book.shared);if(sv&&sv.raw)topIntroText+=' '+sv.raw;
+   }
+  }
+  const hasSampleRows=/ví dụ minh họa|FILE MẪU ĐỂ NHẬP KHẨU/i.test(topIntroText);
+  if(hasSampleRows){
+   for(let r=8;r<=Math.min(15,maxRow);r++){
+    const rNode=rows.get(r);if(!rNode)continue;
+    for(const c of xmlChildren(rNode,'c')){
+     if(first(c,'f'))continue;
+     for(const ch of Array.from(c.children)){if(ch.localName==='v'||ch.localName==='is')c.removeChild(ch);}
+     c.removeAttribute('t');
+    }
+   }
+  }
   const merges=[];for(const group of all(doc.documentElement,'mergeCell')){const bounds=(group.getAttribute('ref')||'').split(':');if(bounds.length<2)continue;const top=rowFromAddress(bounds[0]),bottom=rowFromAddress(bounds[1]),left=colFromAddress(bounds[0]),right=colFromAddress(bounds[1]);merges.push({top,bottom,left,right});}
-  const result={name,path:info.path,doc,sheetData,rows,cells,maxRow,maxCol,merges,colNums};book.sheetCache.set(name,result);return result;
+  const result={name,path:info.path,doc,sheetData,rows,cells,maxRow,maxCol,merges,colNums,hasSampleRows};book.sheetCache.set(name,result);return result;
  }
  function cellAt(sheet,row,col){return sheet.cells.get(addr(row,col))||null;}
  function mergeAt(sheet,row,col){for(const m of sheet.merges){if(row>=m.top&&row<=m.bottom&&col>=m.left&&col<=m.right)return m;}return null;}
@@ -623,7 +828,18 @@
  // Import filters, explicit data types and Excel number formats.
  const deaccent=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').replace(/\s+/g,' ').trim().toLowerCase();
  function totalTerms(raw){return raw.split(',').map(s=>deaccent(s)).filter(Boolean);}
+ function isStatementFooterOrMetaRow(sheet,book,row){
+  const rowNode=sheet.rows.get(row);if(!rowNode)return false;
+  for(const c of xmlChildren(rowNode,'c')){
+   const v=readString(c,book.shared);if(!v||v.kind!=='s')continue;
+   const text=deaccent(v.raw);if(!text)continue;
+   if(/(phieu nay duoc in|this paper is printed|ngay gio in|printed on|thoi gian in|ngay in\s*:|print date|van ban nay duoc xuat|this document is automatically|tran trong cam on|thank you for using|xac nhan cua ngan hang|bank'?s confirmation|signature valid|duoc ky boi\s*:|postal address\s*:)/i.test(text))return true;
+   if(/^(nguoi lap bieu|nguoi kiem soat|ke toan truong|thu truong don vi)(\s*\(.*\))?$/i.test(text))return true;
+  }
+  return false;
+ }
  function isTotalRow(sheet,book,row,terms){
+  if(isStatementFooterOrMetaRow(sheet,book,row))return true;
   if(!terms.length)return false;
   const rowNode=sheet.rows.get(row);if(!rowNode)return false;
   for(const c of xmlChildren(rowNode,'c')){
@@ -690,8 +906,8 @@
   if(rule.type==='date'||rule.type==='datetime'){
     if(v.kind==='n'){const shift=(sourceBook.date1904?1462:0)-(dstBook.date1904?1462:0);const serial=Number(v.raw)+shift;return {kind:'n',raw:String(rule.type==='date'?Math.floor(serial):serial)};}
     const str=asText(v.raw).trim();let y,m,d,hh=0,mi=0,ss=0,mm;
-    if((mm=/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[T ]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(str))){y=+mm[1];m=+mm[2];d=+mm[3];hh=+(mm[4]||0);mi=+(mm[5]||0);ss=+(mm[6]||0);}
-    else if((mm=/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(str))){d=+mm[1];m=+mm[2];y=+mm[3];if(y<100)y+=y<50?2000:1900;hh=+(mm[4]||0);mi=+(mm[5]||0);ss=+(mm[6]||0);}
+    if((mm=/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[T ]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(str))){y=+mm[1];m=+mm[2];d=+mm[3];hh=+(mm[4]||0);mi=+(mm[5]||0);ss=+(mm[6]||0);}
+    else if((mm=/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(str))){d=+mm[1];m=+mm[2];y=+mm[3];if(y<100)y+=y<50?2000:1900;hh=+(mm[4]||0);mi=+(mm[5]||0);ss=+(mm[6]||0);}
     else throw Error('Không đọc được ngày ở '+reference+': '+str+'. Ví dụ: 21/06/2026 11:40:57.');
     if(hh>23||mi>59||ss>59)throw Error('Giờ/phút/giây không hợp lệ tại '+reference);
     const serial=serialFromDate(y,m,d,dstBook.date1904,reference);
@@ -805,7 +1021,7 @@
    let sourceRows=[];
    for(const e of cfg.sources){
     let rows=Array.from(e.src.rows.keys()).filter(r=>r>=e.start&&r<=e.end).sort((a,b)=>a-b);
-    if(cfg.skipTotals)rows=rows.filter(r=>{if(isTotalRow(e.src,e.book,r,cfg.totalTerms)){summary.skippedTotalSource++;fileStats[e.index].excludedTotals++;
+    rows=rows.filter(r=>{if(isStatementFooterOrMetaRow(e.src,e.book,r)||(cfg.skipTotals&&isTotalRow(e.src,e.book,r,cfg.totalTerms))){summary.skippedTotalSource++;fileStats[e.index].excludedTotals++;
      skipDetails.push(skipRecord('total_source','row',{file:e.name,sheet:e.sourceSheet,source:'Dòng '+r}));return false;}return true;});
     if(cfg.reverse&&cfg.matchMode==='position')rows.reverse();
     for(const sr of rows)sourceRows.push({sr,src:e.src,sourceBook:e.book,sourceName:e.name,sourceIndex:e.index});
@@ -860,8 +1076,14 @@
      if(cfg.skipEmpty&&!cfg.mappings.some(m=>{const v=cellValue(src,sourceBook,sr,m.source);return v&&v.kind!=='e'&&v.raw!=='';})){
        summary.skippedEmpty++;skipDetails.push(skipRecord('empty_row','row',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:'Dòng '+sr}));continue;}
       if(cfg.skipZeros){
-        let isZero = false;
+        let hasZeroMoney = false;
+        let hasNonZeroMoney = false;
         for(const m of cfg.mappings){
+          const targetHeader = cellValue(dst, dstBook, cfg.targetHeaderRow, m.target);
+          const sourceHeader = cellValue(src, sourceBook, cfg.headerRow, m.source);
+          const combinedHeaders = (targetHeader?.raw || '') + ' ' + (sourceHeader?.raw || '');
+          const isMoneyCol = /tiền|amount|giá|phát\s*sinh|nợ|có|thu|chi|debit|credit/i.test(combinedHeaders) || cfg.mappings.length <= 3;
+          if(!isMoneyCol) continue;
           const raw = cellValue(src, sourceBook, sr, m.source);
           if(!raw || raw.raw === '' || raw.kind === 'e') continue;
           const s = String(raw.raw).trim();
@@ -869,16 +1091,12 @@
           const valNum = Number(clean);
           const isNumZero = (!isNaN(valNum) && valNum === 0 && clean.length > 0) || s === '0' || s === '0.0' || s === '0,0' || s === '0.00' || s === '0,00' || s === '0 ₫' || s === '0 đ';
           if(isNumZero){
-            const targetHeader = cellValue(dst, dstBook, cfg.targetHeaderRow, m.target);
-            const sourceHeader = cellValue(src, sourceBook, cfg.headerRow, m.source);
-            const combinedHeaders = (targetHeader?.raw || '') + ' ' + (sourceHeader?.raw || '');
-            if(/tiền|amount|giá|phát\s*sinh|nợ|có|thu|chi/i.test(combinedHeaders) || cfg.mappings.length <= 3){
-              isZero = true;
-              break;
-            }
+            hasZeroMoney = true;
+          } else if(!isNaN(valNum) && clean.length > 0){
+            hasNonZeroMoney = true;
           }
         }
-        if(isZero){
+        if(hasZeroMoney && !hasNonZeroMoney){
           summary.skippedZeros = (summary.skippedZeros || 0) + 1;
           skipDetails.push(skipRecord('zero_value', 'row', { file: sourceName, sheet: cfg.sources[sourceIndex].sourceSheet, source: 'Dòng ' + sr, dest: 'Số tiền = 0' }));
           continue;
@@ -912,6 +1130,18 @@
        if(!raw||raw.raw===''||raw.kind==='e'){
          summary.skippedBlank++;
          skipDetails.push(skipRecord('source_blank','cell',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:addr(srcLoc.row,srcLoc.col),dest:addr(tr,m.target)}));continue;}
+       if(cfg.skipZeros){
+         const targetHeader = cellValue(dst, dstBook, cfg.targetHeaderRow, m.target);
+         const sourceHeader = cellValue(src, sourceBook, cfg.headerRow, m.source);
+         const combinedHeaders = (targetHeader?.raw || '') + ' ' + (sourceHeader?.raw || '');
+         if(/tiền|amount|giá|phát\s*sinh|nợ|có|thu|chi|debit|credit/i.test(combinedHeaders)){
+           const s = String(raw.raw).trim(), clean = s.replace(/[^\d.-]/g, ''), valNum = Number(clean);
+           if((!isNaN(valNum) && valNum === 0 && clean.length > 0) || s === '0' || s === '0.0' || s === '0,0' || s === '0.00' || s === '0,00'){
+             summary.skippedBlank++;
+             skipDetails.push(skipRecord('source_blank','cell',{file:sourceName,sheet:cfg.sources[sourceIndex].sourceSheet,source:addr(srcLoc.row,srcLoc.col),dest:addr(tr,m.target)}));continue;
+           }
+         }
+       }
        const loc=readLocation(dst,tr,m.target),destination=addr(loc.row,loc.col);
        if(targetAddresses.has(destination))throw Error('Hai cột bạn chọn đang trỏ vào cùng một ô gộp '+destination+' tại dòng '+tr+'. Hãy bỏ một cặp cột bị trùng.');
        targetAddresses.add(destination);
@@ -950,7 +1180,7 @@
    for(const rec of reconcile){rec.sourceSum=Number(rec.sourceSum.toFixed(6));rec.beforeSum=Number(rec.beforeSum.toFixed(6));rec.afterSum=Number(rec.afterSum.toFixed(6));rec.diffBefore=Number((rec.sourceSum-rec.beforeSum).toFixed(6));rec.diffAfter=Number((rec.sourceSum-rec.afterSum).toFixed(6));}
    return {settings:cfg,changes,summary,reconcile,differences,fileStats,skipDetails};
   }
- function setCell(sheet,row,col,val,formatCode,styles){
+ function setCell(sheet,row,col,val,formatCode,styles,templateRow=8){
   let rowNode=sheet.rows.get(row);
   if(!rowNode){rowNode=sheet.doc.createElementNS(NS,'row');rowNode.setAttribute('r',String(row));
    const later=Array.from(sheet.rows.entries()).filter(([r])=>r>row).sort((a,b)=>a[0]-b[0])[0];
@@ -959,6 +1189,8 @@
   }
   let cell=cellAt(sheet,row,col);
   if(!cell){cell=sheet.doc.createElementNS(NS,'c');cell.setAttribute('r',addr(row,col));
+   const tplCell=cellAt(sheet,templateRow,col);
+   if(tplCell&&tplCell.getAttribute('s'))cell.setAttribute('s',tplCell.getAttribute('s'));
    let later=null;for(const item of xmlChildren(rowNode,'c')){if(colFromAddress(item.getAttribute('r')||'')>col){later=item;break;}}
    if(later)rowNode.insertBefore(cell,later);else rowNode.appendChild(cell);sheet.cells.set(addr(row,col),cell);
   }
@@ -1049,8 +1281,18 @@
    const dstXml=xmlParse(await clone.file(cfg.dst.path).async('string'));
    const sheet={...cfg.dst,doc:dstXml,sheetData:all(dstXml.documentElement,'sheetData')[0],rows:new Map(),cells:new Map(),maxRow:cfg.dst.maxRow,maxCol:cfg.dst.maxCol};
    for(const row of xmlChildren(sheet.sheetData,'row')){const rn=Number(row.getAttribute('r'));if(rn)sheet.rows.set(rn,row);for(const c of xmlChildren(row,'c'))sheet.cells.set(c.getAttribute('r')?.toUpperCase(),c);}
+   if(cfg.dst.hasSampleRows){
+    for(let sr=8;sr<=15;sr++){
+     const rNode=sheet.rows.get(sr);if(!rNode)continue;
+     for(const c of xmlChildren(rNode,'c')){
+      c.removeAttribute('t');
+      for(const ch of Array.from(c.children))if(['v','is'].includes(ch.localName))c.removeChild(ch);
+     }
+    }
+   }
    const styleManager=getStyleManager(clone);await styleManager.prepare();
-   for(const change of plan.changes)setCell(sheet,change.row,change.col,change.value,change.formatCode,styleManager);
+   const tplRow=(cfg.targetHeaderRow||7)+1;
+   for(const change of plan.changes)setCell(sheet,change.row,change.col,change.value,change.formatCode,styleManager,tplRow);
    await styleManager.save();
    fixDimension(sheet,plan.changes);
    clone.file(cfg.dst.path,new XMLSerializer().serializeToString(sheet.doc));
@@ -1131,6 +1373,14 @@
 
   // Bank statement smart detection, merged headers, and human-friendly mappings.
   const recognizedBankWord=t=>deaccent(t).replace(/\s/g,'');
+  function parseQuickDateTs(v){
+    if(!v||v.raw===''||v.raw==null)return null;
+    if(v.kind==='n'){const n=Number(v.raw);return (n>20000&&n<80000)?n*86400000:null;}
+    const str=String(v.raw).trim();let m;
+    if((m=/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[T ]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(str)))return Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+    if((m=/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})(?:[T ]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(str))){let y=+m[3];if(y<100)y+=y<50?2000:1900;return Date.UTC(y,+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));}
+    return null;
+  }
   function detectStatement(sheet,book){
     const maxScan=Math.min(65,sheet.maxRow),maxC=Math.min(35,Math.max(sheet.maxCol,12));
     let candidate=null;
@@ -1142,13 +1392,14 @@
         const txt=deaccent(v.raw);if(!txt||txt.length>80)continue;
         labels.push({col:c,label:txt});
         if(/^(stt|so thu tu|no\.?|tt)$/.test(txt))serialCol=c;
-        if(/ngay giao dich|ngay hach toan|phat sinh no|phat sinh co|noi dung|so du|transaction date|debit|credit|balance/.test(txt))hits++;
+        if(/ngay giao dich|ngay hach toan|ngay kh thuc hien|requesting date|so but toan|reference number|so ct|phat sinh no|phat sinh co|so tien ghi no|so tien ghi co|no\/debit|co\/credit|dien giai|noi dung|so du|running balance|transaction date|debit|credit|balance/.test(txt))hits++;
       }
       const score=hits+(serialCol?2:0);
       if(score>=4&&(!candidate||score>candidate.score))candidate={header:r,serialCol,score,labels};
     }
     if(!candidate)return null;
     let start=candidate.header+1,end=0,count=0;
+    const dateCols=candidate.labels.filter(x=>/(ngay|date|thoi gian|time)/.test(x.label)).map(x=>x.col);
     if(candidate.serialCol){
       let began=false;
       for(let r=candidate.header+1;r<=sheet.maxRow;r++){
@@ -1158,15 +1409,46 @@
         else if(r>candidate.header+5)break;
       }
     }
-    // When there is no numbered STT sequence, stop before first total row.
+    // When there is no numbered STT sequence, scan transaction rows and stop before total/footer rows.
     if(!count){
-      start=candidate.header+1;
-      const terms=totalTerms(el('totalTerms').value);
-      end=sheet.maxRow;
-      for(let r=start;r<=sheet.maxRow;r++){if(isTotalRow(sheet,book,r,terms)){end=r-1;break;}}
-      count=Math.max(0,end-start+1);
+      const terms=totalTerms(el('totalTerms')?.value||'');
+      let began=false;
+      for(let r=candidate.header+1;r<=sheet.maxRow;r++){
+        if(isTotalRow(sheet,book,r,terms)){if(began)break;else continue;}
+        const rNode=sheet.rows.get(r);if(!rNode)continue;
+        let hasAny=false;
+        for(const c of xmlChildren(rNode,'c')){const v=readString(c,book.shared);if(v&&v.raw!==''&&v.raw!=null){hasAny=true;break;}}
+        if(!hasAny)continue;
+        if(dateCols.length){
+          const hasValidDate=dateCols.some(dc=>{
+            const m=mergeAt(sheet,r,dc);
+            if(m&&(m.right-m.left+1)>=3)return false;
+            return parseQuickDateTs(cellValue(sheet,book,r,dc))!==null;
+          });
+          if(hasValidDate){if(!began)start=r;end=r;count++;began=true;}
+          else if(began&&r>end+2)break;
+        }else{
+          if(!began)start=r;end=r;count++;began=true;
+        }
+      }
+      if(!count){
+        start=candidate.header+1;end=sheet.maxRow;
+        for(let r=start;r<=sheet.maxRow;r++){if(isTotalRow(sheet,book,r,terms)){end=r-1;break;}}
+        count=Math.max(0,end-start+1);
+      }
     }
-    return {...candidate,start,end,count};
+    let shouldReverse=true;
+    if(count>=2&&dateCols.length){
+      for(const dc of dateCols){
+        const tsFirst=parseQuickDateTs(cellValue(sheet,book,start,dc));
+        const tsLast=parseQuickDateTs(cellValue(sheet,book,end,dc));
+        if(tsFirst!==null&&tsLast!==null&&tsFirst!==tsLast){
+          shouldReverse=tsFirst>tsLast;
+          break;
+        }
+      }
+    }
+    return {...candidate,start,end,count,shouldReverse};
   }
   function shortCell(sheet,book,row,col,max=64){
     const v=cellValue(sheet,book,row,col);if(!v)return '';
@@ -1178,8 +1460,20 @@
       const sheet=await sheetOf(srcBook,el('sourceSheet').value);
       const suggestion=detectStatement(sheet,srcBook);
       if(autoSet){
-        if(suggestion){el('headerRow').value=suggestion.header;el('sourceStart').value=suggestion.start;el('sourceEnd').value=suggestion.end;el('reverse').checked=true;el('skipTotals').checked=true;}
-        else {el('headerRow').value=1;el('sourceStart').value=2;el('sourceEnd').value='';}
+        if(suggestion){
+          el('headerRow').value=suggestion.header;
+          el('sourceStart').value=suggestion.start;
+          el('sourceEnd').value=suggestion.end;
+          el('reverse').checked=suggestion.shouldReverse??true;
+          el('skipTotals').checked=true;
+          if(el('sourceHeaderTag')){el('sourceHeaderTag').textContent='Tự nhận diện dòng '+suggestion.header;el('sourceHeaderTag').style.display='inline-flex';}
+        }
+        else {
+          const detected=detectHeaderRow(sheet,srcBook);
+          el('headerRow').value=detected;
+          el('sourceStart').value=detected+1;
+          el('sourceEnd').value='';
+        }
       }
       const start=Number(el('sourceStart').value)||2,end=Number(el('sourceEnd').value)||sheet.maxRow;
       const mergeCount=sheet.merges.length;
@@ -1198,7 +1492,7 @@
     if(!sheet||!sheet.rows.size){box.style.display='none';return;}
     let columns=[];const header=Number(el('headerRow').value)||1;
     if(suggestion){
-      const keys=[/^(stt|so thu tu)$/, /ngay giao dich/,/phat sinh no/,/phat sinh co/,/noi dung/,/but toan/];
+      const keys=[/^(stt|so thu tu)$/,/ngay giao dich|transaction date/,/so ct|so but toan|reference number/,/phat sinh no|so tien ghi no|no\/debit/,/phat sinh co|so tien ghi co|co\/credit/,/noi dung|dien giai|description/];
       for(const k of keys){const f=suggestion.labels.find(x=>k.test(x.label));if(f)columns.push(f.col);}
     }
     if(columns.length<3){columns=getColumns(sheet,book,header,15).filter(c=>c.header).slice(0,6).map(c=>c.num);}
@@ -1346,8 +1640,9 @@
     el('sourcePeek').style.display='none';
     if(el('sourceHeaderTag')) el('sourceHeaderTag').style.display='none';
   }
-  refreshSourceUI();invalidate();await refreshCols();
+  refreshSourceUI();invalidate();
   if(srcBook)await showSourceSummary({autoSet:updateTemplate&&el('autoSourceRange').checked});
+  else await refreshCols();
  }
  async function moveSource(i,delta){const ni=i+delta;if(ni<0||ni>=srcEntries.length)return;const [item]=srcEntries.splice(i,1);srcEntries.splice(ni,0,item);await afterSourceListChange(true);toast('Đã đổi thứ tự. Hãy xem trước lại để kiểm tra.');}
  async function removeSource(i){if(!await window.efAsk('Bỏ file “'+srcEntries[i].file.name+'” khỏi phiên làm việc? File trên máy vẫn được giữ nguyên.','Xác nhận gỡ file nguồn',true))return;srcEntries.splice(i,1);await afterSourceListChange(true);toast('Đã bỏ file khỏi danh sách nguồn.');}

@@ -191,6 +191,9 @@
     if (/ban\s*ra|bkbr|01-1/.test(nameNorm) || /nguoi\s*mua|mst\s*nguoi\s*mua|doanh\s*so\s*ban|hang\s*hoa.*?ban\s*ra/i.test(firstRowsText)) {
       return { id: 'banra', title: 'Bảng kê bán ra', code: '01-1' };
     }
+    if (/sao\s*ke|truy\s*van\s*giao\s*dich|transaction\s*enquiry/.test(nameNorm) || (/(ghi\s*no|phat\s*sinh\s*no|no\/debit)/i.test(firstRowsText) && /(ghi\s*co|phat\s*sinh\s*co|co\/credit)/i.test(firstRowsText))) {
+      return { id: 'saoke', title: 'Sao kê ngân hàng', code: 'SKNH' };
+    }
     if (/bao\s*co|phat\s*sinh\s*co|ghi\s*co|gbc|tien\s*vao|thu\s*tien/.test(nameNorm) || /bao\s*co|ghi\s*co|phat\s*sinh\s*co/i.test(firstRowsText)) {
       return { id: 'baoco', title: 'Giấy báo có', code: 'GBC' };
     }
@@ -227,12 +230,12 @@
     return bestIdx;
   }
 
-  // Kiểm tra dòng tổng cộng
+  // Kiểm tra dòng tổng cộng hoặc dòng chân trang (Printed on / Ngày giờ in)
   function isSummaryRow(row) {
     if (!row || !row.length) return false;
-    const text = row.slice(0, 5).join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const text = row.slice(0, 5).join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
     return /^(cong|tong|tong\s*cong|tong\s*nam|tong\s*quy|so\s*du|total)/.test(text.trim()) ||
-           /\b(tong\s*cong|tong\s*phat\s*sinh|so\s*du\s*cuoi)\b/.test(text);
+           /\b(tong\s*cong|tong\s*phat\s*sinh|so\s*du\s*cuoi|phieu\s*nay\s*duoc\s*in|this\s*paper\s*is\s*printed|ngay\s*gio\s*in|printed\s*on|van\s*ban\s*nay\s*duoc\s*xuat|tran\s*trong\s*cam\s*on)\b/.test(text);
   }
 
   // Kiểm tra dòng tiêu đề lặp lại

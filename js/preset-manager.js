@@ -8,31 +8,32 @@
   const $ = id => document.getElementById(id);
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const PRESETS_STORAGE_KEY = 'excelflow_presets_v2';
-  const MEMORY_STORAGE_KEY = 'excelflow_column_memory_v2';
+  const PRESETS_STORAGE_KEY = 'excelflow_presets_v3';
+  const MEMORY_STORAGE_KEY = 'excelflow_column_memory_v3';
 
   // Danh sách từ khóa ngân hàng & hóa đơn thuế phổ biến để auto-seed gợi ý ghép cột
   const BUILTIN_MAPPINGS = [
     // Bảng kê thuế GTGT (01-1 bán ra, 01-2 mua vào) & Sổ BKMV / BKBR
     { src: ['ký hiệu hóa đơn', 'ky hieu hoa don', 'ký hiệu hd', 'ky hieu hd', 'ký hiệu', 'serial', 'seri'], dst: ['Serial', 'Ký hiệu hóa đơn', 'Ký hiệu HĐ'], type: 'text' },
-    { src: ['số hoá đơn', 'số hóa đơn', 'so hoa don', 'số hđ', 'so hd', 'số', 'so', 'inv no', 'invoice no'], dst: ['Số', 'Số hoá đơn', 'Số hóa đơn', 'Số HĐ'], type: 'text' },
-    { src: ['ngày phát hành', 'ngay phat hanh', 'ngày lập', 'ngay lap', 'ngày hđ', 'ngày hóa đơn', 'ngay hd', 'ngay hoa don', 'inv date', 'invoice date'], dst: ['Ngày', 'Ngày hóa đơn', 'Ngày phát hành', 'Ngày CT (*)'], type: 'date' },
-    { src: ['tên người bán', 'ten nguoi ban', 'người bán', 'tên người mua', 'ten nguoi mua', 'người mua', 'tên khách hàng', 'ten khach hang', 'khách hàng', 'khach hang'], dst: ['Tên khách hàng', 'Tên người bán', 'Tên người mua', 'Khách hàng', 'Mã đối tượng (*)'], type: 'text' },
+    { src: ['số hoá đơn', 'số hóa đơn', 'so hoa don', 'số hđ', 'so hd', 'inv no', 'invoice no'], dst: ['Số', 'Số hoá đơn', 'Số hóa đơn', 'Số HĐ'], type: 'text' },
+    { src: ['ngày phát hành', 'ngay phat hanh', 'ngày lập', 'ngay lap', 'ngày hđ', 'ngày hóa đơn', 'ngay hd', 'ngay hoa don', 'inv date', 'invoice date'], dst: ['Ngày hóa đơn', 'Ngày phát hành', 'Ngày CT (*)', 'Ngày'], type: 'date' },
+    { src: ['tên người bán', 'ten nguoi ban', 'người bán', 'tên người mua', 'ten nguoi mua', 'người mua', 'tên khách hàng', 'ten khach hang'], dst: ['Tên khách hàng', 'Tên người bán', 'Tên người mua', 'Khách hàng', 'Tên đối tượng'], type: 'text' },
     { src: ['mã số thuế người bán', 'ma so thue nguoi ban', 'mã số thuế người mua', 'ma so thue nguoi mua', 'mã số thuế', 'ma so thue', 'mst', 'mst người bán', 'mst người mua'], dst: ['MST', 'Mã số thuế', 'Mã số thuế người bán', 'Mã số thuế người mua'], type: 'text' },
-    { src: ['tiền chưa thuế', 'tien chua thue', 'doanh số bán chưa có thuế', 'doanh số', 'tiền hàng', 'tien hang'], dst: ['Tiền hàng', 'Tiền (*)', 'Doanh số bán chưa có thuế', 'Tiền chưa thuế'], type: 'money' },
-    { src: ['thuế gtgt', 'thue gtgt', 'tiền thuế gtgt', 'thuế', 'thue'], dst: ['Thuế', 'Thuế GTGT', 'Tiền thuế'], type: 'money' },
+    { src: ['tiền chưa thuế', 'tien chua thue', 'doanh số bán chưa có thuế', 'doanh số', 'tiền hàng', 'tien hang'], dst: ['Tiền hàng', 'Doanh số bán chưa có thuế', 'Tiền chưa thuế'], type: 'money' },
+    { src: ['thuế gtgt', 'thue gtgt', 'tiền thuế gtgt', 'tiền thuế'], dst: ['Thuế', 'Thuế GTGT', 'Tiền thuế'], type: 'money' },
     { src: ['tổng tiền hàng', 'tong tien hang', 'tổng thanh toán', 'tong thanh toan', 'tổng tiền', 'tong tien'], dst: ['Tổng tiền hàng', 'Tổng tiền', 'Tổng thanh toán'], type: 'money' },
 
-    // Sao kê ngân hàng phổ biến
-    { src: ['stt', 'số thứ tự', 'so thu tu', 'no', 'order'], dst: 'Số chứng từ (*)', type: 'text' },
-    { src: ['số ct', 'số chứng từ', 'so ct', 'so chung tu', 'mã gd', 'mã giao dịch', 'ma gd', 'số tham chiếu', 'ref no', 'trans no'], dst: 'Số chứng từ (*)', type: 'text' },
-    { src: ['ngày', 'ngày gd', 'ngày giao dịch', 'ngay gd', 'ngay giao dich', 'ngày ct', 'ngày chứng từ', 'ngay ct', 'date', 'trans date'], dst: 'Ngày CT (*)', type: 'date' },
-    { src: ['tiền', 'số tiền', 'so tien', 'phát sinh', 'phát sinh có', 'ghi có', 'credit', 'amount', 'tiền (*)', 'số tiền gd', 'tiền gd'], dst: 'Tiền (*)', type: 'money' },
-    { src: ['số tiền ghi nợ', 'ghi nợ', 'debit'], dst: 'Tiền (*)', type: 'money' },
-    { src: ['diễn giải', 'dien giai', 'nội dung', 'noi dung', 'nội dung gd', 'nội dung giao dịch', 'ghi chú', 'description', 'remarks'], dst: 'Diễn giải', type: 'text' },
-    { src: ['mã đối tượng', 'ma doi tuong', 'đối tượng', 'khách hàng', 'đơn vị'], dst: 'Mã đối tượng (*)', type: 'text' },
-    { src: ['tài khoản nợ', 'tk nợ', 'tk no'], dst: 'Tk nợ', type: 'text' },
-    { src: ['tài khoản có', 'tk có', 'tk co'], dst: 'Tk có', type: 'text' }
+    // Sao kê ngân hàng phổ biến (Vietcombank, Techcombank, MB Bank, ACB, BIDV, VietinBank...)
+    { src: ['ngày giao dịch', 'ngay giao dich', 'ngày giao dịch/transaction date', 'transaction date', 'ngày gd', 'ngay gd', 'ngày ct', 'ngày chứng từ', 'trans date'], dst: ['Ngày', 'Ngày CT (*)', 'Ngày giao dịch', 'Ngày hạch toán'], type: 'date' },
+    { src: ['số tiền ghi có', 'so tien ghi co', 'phát sinh có', 'phat sinh co', 'có/credit', 'ghi có', 'credit', 'tiền vào', 'số tiền thu'], dst: ['Số tiền thu', 'Tiền (*)', 'Phát sinh có', 'Số tiền ghi có'], type: 'money' },
+    { src: ['số tiền ghi nợ', 'so tien ghi no', 'phát sinh nợ', 'phat sinh no', 'nợ/debit', 'ghi nợ', 'debit', 'tiền ra', 'số tiền chi'], dst: ['Số tiền chi', 'Tiền (*)', 'Phát sinh nợ', 'Số tiền ghi nợ'], type: 'money' },
+    { src: ['nội dung chi tiết', 'noi dung chi tiet', 'diễn giải/description', 'diễn giải', 'dien giai', 'nội dung', 'noi dung', 'nội dung gd', 'nội dung giao dịch', 'transactions in detail', 'description', 'remarks'], dst: ['Diễn giải', 'Nội dung', 'Nội dung chi tiết'], type: 'text' },
+    { src: ['số ct', 'so ct', 'số chứng từ', 'so chung tu', 'số bút toán/reference number', 'số bút toán', 'so but toan', 'số tham chiếu', 'mã gd', 'mã giao dịch', 'reference number', 'doc no', 'ref no', 'trans no'], dst: ['Số tham chiếu', 'Số chứng từ (*)', 'Số CT', 'Số bút toán'], type: 'text' },
+    { src: ['tên tài khoản đối ứng', 'ten tai khoan doi ung', 'remitter\'s account name', 'đơn vị thụ hưởng/đơn vị chuyển', 'tên đối tác', 'tên đối tượng'], dst: ['Tên đối tượng', 'Mã đối tượng (*)', 'Khách hàng'], type: 'text' },
+    { src: ['stt', 'số thứ tự', 'so thu tu', 'order'], dst: ['Số chứng từ (*)', 'STT'], type: 'text' },
+    { src: ['mã đối tượng', 'ma doi tuong', 'đối tượng'], dst: ['Mã đối tượng (*)', 'Mã đối tượng'], type: 'text' },
+    { src: ['tài khoản nợ', 'tk nợ', 'tk no'], dst: ['Tk nợ'], type: 'text' },
+    { src: ['tài khoản có', 'tk có', 'tk co'], dst: ['Tk có'], type: 'text' }
   ];
 
   function toast(msg) {
@@ -82,10 +83,32 @@
 
     const defaults = [
       {
+        id: 'preset_vcb_pdf_asp_default',
+        name: 'Sao kê Vietcombank (PDF) → Mẫu Sao kê Ngân hàng (ASP/MISA)',
+        description: 'Ghép chuẩn PDF Sao kê Vietcombank vào file mẫu nhập khẩu Sao_ke_ngan_hang.xlsx (Ngày, Số tiền thu, Số tiền chi, Diễn giải, Số tham chiếu)',
+        updatedAt: Date.now(),
+        mapping: 'B -> A\nE -> B\nD -> C\nG -> D\nC -> E',
+        formats: 'A -> date\nB -> money\nC -> money\nD -> text\nE -> text',
+        reverse: false,
+        skipTotals: true,
+        skipZeros: true
+      },
+      {
+        id: 'preset_tcb_asp_default',
+        name: 'Sao kê Techcombank (Excel) → Mẫu Sao kê Ngân hàng (ASP/MISA)',
+        description: 'Ghép chuẩn Sao kê Techcombank vào file mẫu Sao_ke_ngan_hang.xlsx (Ngày giao dịch, Có/Credit, Nợ/Debit, Diễn giải, Số bút toán, Tên đối ứng)',
+        updatedAt: Date.now() - 10000,
+        mapping: 'B -> A\nI -> B\nH -> C\nG -> D\nC -> E\nF -> F',
+        formats: 'A -> date\nB -> money\nC -> money\nD -> text\nE -> text\nF -> text',
+        reverse: true,
+        skipTotals: true,
+        skipZeros: true
+      },
+      {
         id: 'preset_tax_invoice_default',
         name: 'Tờ khai Thuế GTGT (PDF) → Bảng kê Mua vào BKMV',
         description: 'Mẫu chuẩn trích xuất PDF Tờ khai thuế GTGT (01-2) điền vào Sổ BKMV (Serial, Số, Ngày, Tên KH, MST, Tiền hàng, Thuế)',
-        updatedAt: Date.now(),
+        updatedAt: Date.now() - 20000,
         mapping: 'C -> A\nD -> B\nE -> C\nF -> D\nG -> E\nI -> F\nK -> G',
         formats: 'C -> date\nF -> money\nG -> money',
         reverse: false,
@@ -222,21 +245,29 @@
 
       // 3. Khớp theo danh sách từ khóa ngân hàng & hóa đơn thuế chuẩn
       if (!matchedDst) {
+        const matchText = (header, term) => {
+          if (!header || !term) return false;
+          if (header === term) return true;
+          if (term.length <= 4 || header.length <= 4) return false;
+          return header.includes(term) || term.includes(header);
+        };
         for (const rule of BUILTIN_MAPPINGS) {
-          const matchSrc = rule.src.some(term => sName.includes(term) || term.includes(sName));
+          const matchSrc = rule.src.some(term => matchText(sName, term));
           if (matchSrc) {
-            matchedDst = dstOptions.find(d => {
-              if (usedDst.has(d.value)) return false;
-              const dstClean = cleanHeader(d.textContent);
-              if (Array.isArray(rule.dst)) {
-                return rule.dst.some(target => {
-                  const tClean = cleanHeader(target);
-                  return dstClean === tClean || dstClean.includes(tClean) || tClean.includes(dstClean);
-                });
+            const dstTargets = Array.isArray(rule.dst) ? rule.dst : [rule.dst];
+            // Ưu tiên khớp chính xác tên cột đích trước, sau đó mới khớp chuỗi con
+            for (const target of dstTargets) {
+              const tClean = cleanHeader(target);
+              matchedDst = dstOptions.find(d => !usedDst.has(d.value) && cleanHeader(d.textContent) === tClean);
+              if (matchedDst) break;
+            }
+            if (!matchedDst) {
+              for (const target of dstTargets) {
+                const tClean = cleanHeader(target);
+                matchedDst = dstOptions.find(d => !usedDst.has(d.value) && matchText(cleanHeader(d.textContent), tClean));
+                if (matchedDst) break;
               }
-              const tClean = cleanHeader(rule.dst);
-              return dstClean === tClean || dstClean.includes(tClean) || tClean.includes(dstClean);
-            });
+            }
             if (matchedDst) {
               matchedType = rule.type;
               break;
