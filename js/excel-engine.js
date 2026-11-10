@@ -1546,14 +1546,15 @@
 
  // Events and offline initialization.
  function goPage(which){
-   const history=which==='history',compare=which==='compare',home=which==='home',pdf2excel=which==='pdf2excel',merger=which==='merger';
-   const isImport=!history&&!compare&&!home&&!pdf2excel&&!merger;
+   const history=which==='history',compare=which==='compare',home=which==='home',pdf2excel=which==='pdf2excel',merger=which==='merger',diff=which==='diff';
+   const isImport=!history&&!compare&&!home&&!pdf2excel&&!merger&&!diff;
    el('homePage')?.classList.toggle('active',home);
    el('importPage')?.classList.toggle('active',isImport);
    el('comparePage')?.classList.toggle('active',compare);
    el('historyPage')?.classList.toggle('active',history);
    el('pdf2ExcelPage')?.classList.toggle('active',pdf2excel);
    el('mergerPage')?.classList.toggle('active',merger);
+   el('diffPage')?.classList.toggle('active',diff);
 
    // Ẩn thanh header hoàn toàn khi ở Trang chủ
    if(el('efHeader')) el('efHeader').style.display = home ? 'none' : 'flex';
@@ -1563,6 +1564,7 @@
    el('navImport')?.classList.toggle('active',isImport);
    el('navMerger')?.classList.toggle('active',merger);
    el('navPdf2Excel')?.classList.toggle('active',pdf2excel);
+   el('navDiff')?.classList.toggle('active',diff);
    el('navCompare')?.classList.toggle('active',compare);
    el('navHistory')?.classList.toggle('active',history);
 
@@ -1579,12 +1581,14 @@
  el('navImport')?.addEventListener('click',()=>goPage('import'));
  el('navMerger')?.addEventListener('click',()=>goPage('merger'));
  el('navPdf2Excel')?.addEventListener('click',()=>goPage('pdf2excel'));
+ el('navDiff')?.addEventListener('click',()=>goPage('diff'));
  el('navCompare')?.addEventListener('click',()=>goPage('compare'));
  el('navHistory')?.addEventListener('click',()=>goPage('history'));
  document.querySelectorAll('[data-nav-home]').forEach(btn=>btn.addEventListener('click',()=>goPage('home')));
  document.querySelectorAll('[data-nav-import]').forEach(btn=>btn.addEventListener('click',()=>goPage('import')));
  document.querySelectorAll('[data-nav-merger]').forEach(btn=>btn.addEventListener('click',()=>goPage('merger')));
  document.querySelectorAll('[data-nav-pdf2excel]').forEach(btn=>btn.addEventListener('click',()=>goPage('pdf2excel')));
+ document.querySelectorAll('[data-nav-diff]').forEach(btn=>btn.addEventListener('click',()=>goPage('diff')));
  // Source files are additive; only the destination remains a single file.
  const fileVersions={source:0,target:0};
  function fileIdentity(file){return [file.name,file.size,file.lastModified].join('::');}

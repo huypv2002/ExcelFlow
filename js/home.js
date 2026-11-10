@@ -85,6 +85,14 @@
             const navPdf = document.getElementById('navPdf2Excel');
             if (navPdf) navPdf.click();
           }
+        } else if (appId === 'diff') {
+          // Mở công cụ Đối chiếu 2 file Excel
+          if (typeof window.efGoPage === 'function') {
+            window.efGoPage('diff');
+          } else {
+            const navDiff = document.getElementById('navDiff');
+            if (navDiff) navDiff.click();
+          }
         } else {
           // Thông báo Toast nhẹ nhàng, không mở popup
           showToast(`Chức năng "${appTitle}" đang được phát triển!`);
