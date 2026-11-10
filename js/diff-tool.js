@@ -688,7 +688,9 @@
   function renderPairsList() {
     const list = el('diffPairsList');
     const countEl = el('diffColPairCount');
+    const advBadge = el('diffAdvancedBadge');
     if (countEl) countEl.textContent = String(state.pairs.length);
+    if (advBadge) advBadge.textContent = `${state.pairs.length} cặp cột`;
     if (!list) return;
 
     if (!state.bookA || !state.bookB) {
@@ -1332,10 +1334,6 @@
           populateColumnPickers();
           renderPairsList();
         }
-        if (id === `diffRowPick${side}`) {
-          const qId = side === 'A' ? 'diffQuickRowsA' : 'diffQuickRowsB';
-          if (el(qId)) el(qId).value = node.value;
-        }
         renderFilePeek(side);
       });
     });
@@ -1346,10 +1344,13 @@
     document.querySelectorAll('.diff-scope-tab[data-diff-scope]').forEach(tab => {
       tab.classList.toggle('active', tab.dataset.diffScope === scope);
     });
+
+    const adv = el('diffAdvancedDetails');
     const rowBox = el('diffRowScopeBox');
     const colBox = el('diffColMapper');
-    if (rowBox) rowBox.style.display = scope === 'rows' ? 'block' : 'none';
-    if (colBox) colBox.style.display = 'block';
+    if (adv) adv.open = scope === 'cols' || scope === 'rows';
+    if (rowBox) rowBox.classList.toggle('is-emphasized', scope === 'rows');
+    if (colBox) colBox.classList.toggle('is-emphasized', scope === 'cols');
 
     const titleEl = el('diffMapperTitle');
     if (titleEl) {
@@ -1385,9 +1386,9 @@
       if (el(`diffPeek${side}`)) el(`diffPeek${side}`).innerHTML = '';
     });
 
-    if (el('diffQuickRowsA')) el('diffQuickRowsA').value = '';
-    if (el('diffQuickRowsB')) el('diffQuickRowsB').value = '';
     if (el('diffResultCard')) el('diffResultCard').style.display = 'none';
+    if (el('diffAdvancedDetails')) el('diffAdvancedDetails').open = false;
+    setScope('all');
     populateColumnPickers();
     renderPairsList();
     updateRunBtnState();
@@ -1401,15 +1402,6 @@
 
     document.querySelectorAll('.diff-scope-tab[data-diff-scope]').forEach(tab => {
       tab.addEventListener('click', () => setScope(tab.dataset.diffScope));
-    });
-
-    el('diffQuickRowsA')?.addEventListener('input', e => {
-      if (el('diffRowPickA')) el('diffRowPickA').value = e.target.value;
-      renderFilePeek('A');
-    });
-    el('diffQuickRowsB')?.addEventListener('input', e => {
-      if (el('diffRowPickB')) el('diffRowPickB').value = e.target.value;
-      renderFilePeek('B');
     });
 
     el('diffAutoMatchByNameBtn')?.addEventListener('click', () => autoMatchColumns('byName'));

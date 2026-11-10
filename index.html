@@ -8,7 +8,7 @@
 (function(){try{var t=localStorage.getItem('puddin_ef_theme');if(t==='red'||t==='green'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
 </script>
 <link rel="stylesheet" href="css/style.css?v=20261111">
-<link rel="stylesheet" href="css/home.css?v=20261111_4">
+<link rel="stylesheet" href="css/home.css?v=20261111_5">
 </head>
 <body>
 <div class="ef-app">
@@ -471,10 +471,38 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
   <div class="diff-container">
     <div class="diff-page-head">
       <h2>Đối chiếu dữ liệu giữa 2 file Excel</h2>
-      <p class="helper">So sánh khớp hoàn toàn hoặc tìm dòng thiếu, dòng dư, ô sai lệch giữa 2 file Excel. Hỗ trợ chọn cột/dòng cụ thể và đọc ngược thứ tự sao kê.</p>
+      <p class="helper">Chọn 2 file Excel bên dưới rồi bấm <strong>Đối chiếu 2 file ngay</strong>. Hỗ trợ chọn cột/dòng cụ thể, đọc ngược sao kê và tìm dòng thiếu/dư.</p>
     </div>
 
-    <!-- Bước 1: Chọn 2 file -->
+    <!-- Quy tắc cơ bản & Nút đối chiếu ngay (Đặt trên cùng) -->
+    <div class="ef-card diff-quick-bar">
+      <div class="diff-quick-row">
+        <div class="diff-quick-group">
+          <span class="diff-quick-label">Phạm vi đối chiếu:</span>
+          <div class="diff-scope-tabs" role="tablist" aria-label="Phạm vi đối chiếu">
+            <button type="button" class="diff-scope-tab active" data-diff-scope="all">Cả 2 file (Toàn bộ)</button>
+            <button type="button" class="diff-scope-tab" data-diff-scope="cols">Chọn cột đối chiếu</button>
+            <button type="button" class="diff-scope-tab" data-diff-scope="rows">Chọn dòng đối chiếu</button>
+          </div>
+        </div>
+
+        <div class="diff-quick-group diff-quick-mode">
+          <label class="diff-quick-label" for="diffCompareMode">Cách đối chiếu:</label>
+          <select id="diffCompareMode">
+            <option value="smart">Thông minh theo thứ tự (Khớp, lệch, thiếu, dư)</option>
+            <option value="positional">So từng dòng 1-1 theo vị trí (k ↔ k)</option>
+            <option value="unordered">Không xét thứ tự (Tìm trùng, thiếu, dư)</option>
+          </select>
+        </div>
+
+        <div class="diff-quick-actions">
+          <button type="button" class="btn outline" id="diffResetBtn">↺ Làm mới</button>
+          <button type="button" class="btn teal primary-action" id="diffRunBtn" disabled>⌕ Đối chiếu 2 file ngay</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chọn 2 file -->
     <div class="diff-files-grid">
       <!-- File 1 -->
       <div class="ef-card diff-file-card" id="diffCardA">
@@ -512,11 +540,6 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
               <label for="diffEndA">Đến dòng <small class="muted">(trống = hết)</small></label>
               <input type="number" id="diffEndA" min="1" placeholder="Cuối file" />
             </div>
-          </div>
-
-          <div class="field diff-row-pick-field">
-            <label for="diffRowPickA">Chọn các dòng cụ thể <small class="muted">(tùy chọn, VD: 2-20 hoặc 5, 8, 12-15)</small></label>
-            <input type="text" id="diffRowPickA" placeholder="Để trống = lấy hết từ dòng bắt đầu đến kết thúc" />
           </div>
 
           <label class="switch diff-reverse-switch" title="Đảo ngược thứ tự các dòng của File 1: dòng cuối lên đầu, dòng đầu xuống cuối (dùng khi 1 file là sao kê ngược chiều với file còn lại)">
@@ -567,11 +590,6 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
             </div>
           </div>
 
-          <div class="field diff-row-pick-field">
-            <label for="diffRowPickB">Chọn các dòng cụ thể <small class="muted">(tùy chọn, VD: 2-20 hoặc 5, 8, 12-15)</small></label>
-            <input type="text" id="diffRowPickB" placeholder="Để trống = lấy hết từ dòng bắt đầu đến kết thúc" />
-          </div>
-
           <label class="switch diff-reverse-switch" title="Đảo ngược thứ tự các dòng của File 2: dòng cuối lên đầu, dòng đầu xuống cuối (dùng khi sao kê có dòng bắt đầu nằm ở cuối)">
             <input type="checkbox" id="diffReverseB" />
             <span class="switch-track"></span>
@@ -583,109 +601,90 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
       </div>
     </div>
 
-    <!-- Bước 2: Phạm vi & Cách đối chiếu -->
-    <div class="ef-card diff-config-card">
-      <div class="diff-config-top">
-        <div>
-          <h3>Phạm vi &amp; Quy tắc đối chiếu</h3>
-          <p class="helper">Chọn đối chiếu cả 2 file, chọn nhiều cột tương ứng, hoặc chọn phạm vi dòng cần so sánh.</p>
-        </div>
-        <div class="diff-scope-tabs" role="tablist" aria-label="Phạm vi đối chiếu">
-          <button type="button" class="diff-scope-tab active" data-diff-scope="all">Cả 2 file (Toàn bộ)</button>
-          <button type="button" class="diff-scope-tab" data-diff-scope="cols">Chọn cột đối chiếu</button>
-          <button type="button" class="diff-scope-tab" data-diff-scope="rows">Chọn dòng đối chiếu</button>
-        </div>
-      </div>
+    <!-- Quy tắc nâng cao (Đặt ở dưới, thu gọn mặc định) -->
+    <details class="ef-card diff-advanced-card" id="diffAdvancedDetails">
+      <summary class="diff-advanced-summary">
+        <span>⚙ Quy tắc nâng cao &amp; tùy chỉnh chi tiết <small class="muted">(Chọn cặp cột, chọn dòng cụ thể &amp; chuẩn hóa dữ liệu)</small></span>
+        <span class="diff-advanced-pill" id="diffAdvancedBadge">0 cặp cột</span>
+      </summary>
 
-      <!-- Khung chọn cặp cột -->
-      <div class="diff-col-mapper" id="diffColMapper">
-        <div class="diff-mapper-toolbar">
-          <span class="diff-mapper-title" id="diffMapperTitle">Các cặp cột sẽ đối chiếu (<strong id="diffColPairCount">0</strong> cặp)</span>
-          <div class="diff-mapper-actions">
-            <button type="button" class="btn small outline" id="diffAutoMatchByNameBtn">⚡ Tự ghép theo tên tiêu đề</button>
-            <button type="button" class="btn small outline" id="diffAutoMatchByPosBtn">⇄ Ghép tất cả theo vị trí (A↔A...)</button>
-            <button type="button" class="btn small outline" id="diffClearPairsBtn">✕ Bỏ hết cặp</button>
+      <div class="diff-advanced-body">
+        <!-- Khung chọn dòng cụ thể -->
+        <div class="diff-row-scope-box" id="diffRowScopeBox">
+          <div class="diff-row-scope-grid">
+            <div class="field">
+              <label for="diffRowPickA">Chọn các dòng cụ thể ở File 1 <small class="muted">(tùy chọn, VD: 2-30 hoặc 5, 8, 12-15)</small></label>
+              <input type="text" id="diffRowPickA" placeholder="Để trống = lấy hết từ dòng bắt đầu đến kết thúc" />
+            </div>
+            <div class="field">
+              <label for="diffRowPickB">Chọn các dòng cụ thể ở File 2 <small class="muted">(tùy chọn, VD: 2-30 hoặc 5, 8, 12-15)</small></label>
+              <input type="text" id="diffRowPickB" placeholder="Để trống = lấy hết từ dòng bắt đầu đến kết thúc" />
+            </div>
+          </div>
+          <p class="helper" style="margin-top:6px">Mẹo: Kết hợp chọn dòng cụ thể với công tắc <strong>Đọc ngược thứ tự dòng</strong> và ghép cột bên dưới.</p>
+        </div>
+
+        <!-- Khung chọn cặp cột -->
+        <div class="diff-col-mapper" id="diffColMapper">
+          <div class="diff-mapper-toolbar">
+            <span class="diff-mapper-title" id="diffMapperTitle">Các cặp cột sẽ đối chiếu (<strong id="diffColPairCount">0</strong> cặp)</span>
+            <div class="diff-mapper-actions">
+              <button type="button" class="btn small outline" id="diffAutoMatchByNameBtn">⚡ Tự ghép theo tên tiêu đề</button>
+              <button type="button" class="btn small outline" id="diffAutoMatchByPosBtn">⇄ Ghép tất cả theo vị trí (A↔A...)</button>
+              <button type="button" class="btn small outline" id="diffClearPairsBtn">✕ Bỏ hết cặp</button>
+            </div>
+          </div>
+
+          <div class="diff-pairs-list" id="diffPairsList">
+            <div class="diff-pairs-empty">Hãy tải cả 2 file Excel để chọn cột đối chiếu.</div>
+          </div>
+
+          <div class="diff-add-pair-row">
+            <div class="field">
+              <label for="diffAddColA">Cột của File 1</label>
+              <select id="diffAddColA"></select>
+            </div>
+            <div class="diff-pair-arrow">↔</div>
+            <div class="field">
+              <label for="diffAddColB">Cột của File 2</label>
+              <select id="diffAddColB"></select>
+            </div>
+            <button type="button" class="btn primary" id="diffAddPairBtn">+ Thêm cặp cột</button>
           </div>
         </div>
 
-        <div class="diff-pairs-list" id="diffPairsList">
-          <div class="diff-pairs-empty">Hãy tải cả 2 file Excel để chọn cột đối chiếu.</div>
-        </div>
-
-        <div class="diff-add-pair-row">
-          <div class="field">
-            <label for="diffAddColA">Cột của File 1</label>
-            <select id="diffAddColA"></select>
+        <!-- Tùy chọn chuẩn hóa nâng cao -->
+        <div class="diff-options-section">
+          <div class="diff-toggles-grid">
+            <label class="switch">
+              <input type="checkbox" id="diffSkipBlank" checked />
+              <span class="switch-track"></span>
+              <span>Bỏ qua dòng trống hoàn toàn</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="diffTrim" checked />
+              <span class="switch-track"></span>
+              <span>Bỏ khoảng trắng thừa (đầu/cuối &amp; khoảng cách kép)</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="diffFlexNum" checked />
+              <span class="switch-track"></span>
+              <span>Khớp số linh hoạt (1,000 = 1000 = 1000.00)</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="diffCaseSensitive" />
+              <span class="switch-track"></span>
+              <span>Phân biệt chữ HOA / chữ thường</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="diffSkipTotals" />
+              <span class="switch-track"></span>
+              <span>Bỏ dòng tổng cộng (Cộng, Tổng cộng, Total...)</span>
+            </label>
           </div>
-          <div class="diff-pair-arrow">↔</div>
-          <div class="field">
-            <label for="diffAddColB">Cột của File 2</label>
-            <select id="diffAddColB"></select>
-          </div>
-          <button type="button" class="btn primary" id="diffAddPairBtn">+ Thêm cặp cột</button>
         </div>
       </div>
-
-      <!-- Khung chọn dòng nhanh khi ở tab "Chọn dòng đối chiếu" -->
-      <div class="diff-row-scope-box" id="diffRowScopeBox" style="display:none">
-        <div class="diff-row-scope-grid">
-          <div class="field">
-            <label for="diffQuickRowsA">Các dòng cần lấy ở File 1 <small class="muted">(VD: 2-30 hoặc 5,7,10-15)</small></label>
-            <input type="text" id="diffQuickRowsA" placeholder="VD: 2-50 hoặc 5, 8, 12-20" />
-          </div>
-          <div class="field">
-            <label for="diffQuickRowsB">Các dòng cần lấy ở File 2 <small class="muted">(VD: 2-30 hoặc 5,7,10-15)</small></label>
-            <input type="text" id="diffQuickRowsB" placeholder="VD: 2-50 hoặc 5, 8, 12-20" />
-          </div>
-        </div>
-        <p class="helper" style="margin-top:6px">Mẹo: Bạn có thể kết hợp cả lọc dòng này với công tắc <strong>Đọc ngược thứ tự dòng</strong> và chọn cột đối chiếu bên trên.</p>
-      </div>
-
-      <!-- Chế độ đối chiếu & Tùy chọn -->
-      <div class="diff-options-section">
-        <div class="field">
-          <label for="diffCompareMode">Cách đối chiếu dòng dữ liệu</label>
-          <select id="diffCompareMode">
-            <option value="smart">Thông minh theo thứ tự — tự nhận diện dòng khớp, lệch ô, dòng thiếu &amp; dòng dư (Khuyên dùng)</option>
-            <option value="positional">So từng dòng 1-1 theo vị trí (Dòng thứ k của File 1 ↔ Dòng thứ k của File 2)</option>
-            <option value="unordered">Không xét thứ tự — kiểm tra tập dòng khớp, dòng thiếu &amp; dòng dư ở mọi vị trí</option>
-          </select>
-        </div>
-
-        <div class="diff-toggles-grid">
-          <label class="switch">
-            <input type="checkbox" id="diffSkipBlank" checked />
-            <span class="switch-track"></span>
-            <span>Bỏ qua dòng trống hoàn toàn</span>
-          </label>
-          <label class="switch">
-            <input type="checkbox" id="diffTrim" checked />
-            <span class="switch-track"></span>
-            <span>Bỏ khoảng trắng thừa (đầu/cuối &amp; khoảng cách kép)</span>
-          </label>
-          <label class="switch">
-            <input type="checkbox" id="diffFlexNum" checked />
-            <span class="switch-track"></span>
-            <span>Khớp số linh hoạt (1,000 = 1000 = 1000.00)</span>
-          </label>
-          <label class="switch">
-            <input type="checkbox" id="diffCaseSensitive" />
-            <span class="switch-track"></span>
-            <span>Phân biệt chữ HOA / chữ thường</span>
-          </label>
-          <label class="switch">
-            <input type="checkbox" id="diffSkipTotals" />
-            <span class="switch-track"></span>
-            <span>Bỏ dòng tổng cộng (Cộng, Tổng cộng, Total...)</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="diff-actions-bar">
-        <button type="button" class="btn outline" id="diffResetBtn">↺ Làm mới</button>
-        <button type="button" class="btn teal primary-action" id="diffRunBtn" disabled>⌕ Đối chiếu 2 file ngay</button>
-      </div>
-    </div>
+    </details>
 
     <!-- Bước 3: Kết quả đối chiếu (Không xuất Excel) -->
     <div class="ef-card diff-result-card" id="diffResultCard" style="display:none">
@@ -774,7 +773,7 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
 <script src="js/home.js?v=20261111"></script>
 <script src="js/pdf2excel.js"></script>
 <script src="js/merger.js?v=20261109"></script>
-<script src="js/diff-tool.js?v=20261111"></script>
+<script src="js/diff-tool.js?v=20261111_2"></script>
 
 
 </body></html>

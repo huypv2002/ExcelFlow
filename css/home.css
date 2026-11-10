@@ -5,6 +5,10 @@
 :root,
 html[data-theme="green"] {
   --ef-page-bg: #f3fbf6;
+  --ef-card-bg: #ffffff;
+  --ef-surface: #f2fbf5;
+  --ef-surface-alt: #dcfce7;
+  --ef-card-border: #cdebd7;
   --ef-accent: #16a34a;
   --ef-accent-dark: #15803d;
   --ef-accent-ink: #166534;
@@ -12,10 +16,13 @@ html[data-theme="green"] {
   --ef-accent-softer: #f0fdf4;
   --ef-accent-border: #86efac;
   --ef-accent-border-strong: #4ade80;
-  --ef-accent-shadow: rgba(22, 163, 74, 0.16);
-  --ef-accent-shadow-strong: rgba(22, 163, 74, 0.24);
+  --ef-accent-shadow: rgba(22, 163, 74, 0.14);
+  --ef-accent-shadow-strong: rgba(22, 163, 74, 0.22);
   --ef-nav-bg: #eef7f1;
   --ef-nav-hover: #dcfce7;
+  --ef-badge-b-bg: #e0f2fe;
+  --ef-badge-b-ink: #0369a1;
+  --ef-badge-b-border: #7dd3fc;
   --teal: #16a34a;
   --teal-dark: #15803d;
   --teal-soft: #dcfce7;
@@ -23,27 +30,39 @@ html[data-theme="green"] {
 }
 
 html[data-theme="red"] {
-  --ef-page-bg: #fef5f5;
-  --ef-accent: #dc2626;
-  --ef-accent-dark: #b91c1c;
-  --ef-accent-ink: #991b1b;
-  --ef-accent-soft: #fee2e2;
-  --ef-accent-softer: #fef2f2;
-  --ef-accent-border: #fca5a5;
-  --ef-accent-border-strong: #f87171;
-  --ef-accent-shadow: rgba(220, 38, 38, 0.16);
-  --ef-accent-shadow-strong: rgba(220, 38, 38, 0.24);
-  --ef-nav-bg: #fdf0f0;
-  --ef-nav-hover: #fee2e2;
-  --teal: #dc2626;
-  --teal-dark: #b91c1c;
-  --teal-soft: #fee2e2;
-  --bg: #fef5f5;
+  --ef-page-bg: #fff5f6;
+  --ef-card-bg: #fffcfd;
+  --ef-surface: #fff0f2;
+  --ef-surface-alt: #ffe4e8;
+  --ef-card-border: #fecdd6;
+  --ef-accent: #e46272;
+  --ef-accent-dark: #cf4a5b;
+  --ef-accent-ink: #9f1239;
+  --ef-accent-soft: #ffe4e8;
+  --ef-accent-softer: #fff1f3;
+  --ef-accent-border: #fda4b4;
+  --ef-accent-border-strong: #f47285;
+  --ef-accent-shadow: rgba(228, 98, 114, 0.15);
+  --ef-accent-shadow-strong: rgba(228, 98, 114, 0.24);
+  --ef-nav-bg: #fdecef;
+  --ef-nav-hover: #fbd7de;
+  --ef-badge-b-bg: #ffe4e8;
+  --ef-badge-b-ink: #9f1239;
+  --ef-badge-b-border: #fda4b4;
+  --teal: #e46272;
+  --teal-dark: #cf4a5b;
+  --teal-soft: #ffe4e8;
+  --bg: #fff5f6;
 }
 
 body {
   background: var(--ef-page-bg) !important;
   transition: background-color 0.25s ease;
+}
+
+.ef-card {
+  background: var(--ef-card-bg) !important;
+  border-color: var(--ef-card-border) !important;
 }
 
 /* Ẩn header mặc định khi ở trang chủ */
@@ -165,8 +184,8 @@ body {
 }
 
 .ef-theme-btn.is-red .ef-theme-dot {
-  background: #dc2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22);
+  background: #e46272;
+  box-shadow: 0 0 0 2px rgba(228, 98, 114, 0.24);
 }
 
 .ef-theme-btn.is-green.active {
@@ -182,10 +201,10 @@ body {
 }
 
 .ef-theme-btn.is-red.active {
-  background: #dc2626 !important;
+  background: #e46272 !important;
   color: #ffffff !important;
-  border-color: #b91c1c !important;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.28) !important;
+  border-color: #cf4a5b !important;
+  box-shadow: 0 2px 6px rgba(228, 98, 114, 0.28) !important;
 }
 
 .ef-theme-btn.is-red.active .ef-theme-dot {
@@ -259,16 +278,16 @@ body {
   align-items: center;
   margin-bottom: 18px;
   padding: 11px 18px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--ef-card-bg);
+  border: 1px solid var(--ef-card-border);
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
 .ef-back-home-btn {
   border: 0;
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--ef-surface);
+  color: var(--ef-accent-ink);
   font-size: 13px;
   font-weight: 750;
   padding: 8px 16px;
@@ -742,9 +761,9 @@ body {
 }
 
 .diff-file-badge.is-b {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
+  background: var(--ef-badge-b-bg);
+  color: var(--ef-badge-b-ink);
+  border: 1px solid var(--ef-badge-b-border);
 }
 
 .diff-dropzone {
@@ -757,6 +776,17 @@ body {
   text-align: center;
   padding: 16px !important;
   cursor: pointer;
+  background: var(--ef-surface) !important;
+  border-color: var(--ef-accent-border) !important;
+}
+
+.diff-dropzone .drop-main {
+  color: var(--ef-accent-ink);
+}
+
+.diff-dropzone .drop-ico {
+  background: var(--ef-surface-alt) !important;
+  color: var(--ef-accent-dark) !important;
 }
 
 .diff-dropzone input[type="file"] {
@@ -821,8 +851,8 @@ body {
 }
 
 .diff-peek-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ef-surface);
+  border: 1px solid var(--ef-card-border);
   border-radius: 10px;
   padding: 10px;
   flex: 1;
@@ -895,16 +925,15 @@ body {
   background: #fafcff;
 }
 
-/* Config Card */
-.diff-config-card {
-  padding: 18px 20px;
+/* Thanh Quy tắc nhanh & Đối chiếu ngay (Đặt phía trên 2 file) */
+.diff-quick-bar {
+  padding: 14px 18px;
   border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  background: var(--ef-surface) !important;
+  border: 1px solid var(--ef-accent-border) !important;
 }
 
-.diff-config-top {
+.diff-quick-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -912,16 +941,96 @@ body {
   flex-wrap: wrap;
 }
 
-.diff-config-top h3 {
-  margin: 0 0 2px;
-  font-size: 16px;
-  color: #0f172a;
+.diff-quick-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.diff-quick-label {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: var(--ef-accent-ink);
+  white-space: nowrap;
+}
+
+.diff-quick-mode select {
+  min-height: 36px;
+  padding: 6px 32px 6px 10px;
+  border: 1px solid var(--ef-accent-border);
+  border-radius: 9px;
+  background: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  max-width: 310px;
+}
+
+.diff-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Quy tắc nâng cao thu gọn ở phía dưới */
+.diff-advanced-card {
+  padding: 0 !important;
+  border-radius: 14px;
+  background: var(--ef-surface) !important;
+  border: 1px solid var(--ef-card-border) !important;
+  overflow: hidden;
+}
+
+.diff-advanced-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  font-weight: 750;
+  color: var(--ef-accent-ink);
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.diff-advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.diff-advanced-summary:hover {
+  background: var(--ef-surface-alt);
+}
+
+.diff-advanced-pill {
+  font-size: 11.5px;
+  font-weight: 750;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ef-accent-ink);
+  border: 1px solid var(--ef-accent-border);
+  white-space: nowrap;
+}
+
+.diff-advanced-body {
+  padding: 16px 18px 18px;
+  border-top: 1px solid var(--ef-card-border);
+  background: var(--ef-card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .diff-scope-tabs {
   display: inline-flex;
   gap: 6px;
-  background: #f1f5f9;
+  background: #ffffff;
+  border: 1px solid var(--ef-card-border);
   padding: 4px;
   border-radius: 10px;
   flex-wrap: wrap;
@@ -940,8 +1049,8 @@ body {
 }
 
 .diff-scope-tab:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--ef-surface-alt);
+  color: var(--ef-accent-ink);
 }
 
 .diff-scope-tab.active {
@@ -951,13 +1060,19 @@ body {
 }
 
 .diff-col-mapper {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ef-surface);
+  border: 1px solid var(--ef-card-border);
   border-radius: 12px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.diff-col-mapper.is-emphasized,
+.diff-row-scope-box.is-emphasized {
+  border-color: var(--ef-accent);
+  box-shadow: 0 0 0 2px var(--ef-accent-shadow);
 }
 
 .diff-mapper-toolbar {
@@ -1001,7 +1116,7 @@ body {
   color: #64748b;
   font-size: 12.5px;
   background: #ffffff;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--ef-accent-border);
   border-radius: 8px;
 }
 
@@ -1010,7 +1125,7 @@ body {
   align-items: center;
   gap: 7px;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--ef-card-border);
   border-radius: 8px;
   padding: 5px 8px 5px 6px;
   font-size: 12px;
@@ -1044,8 +1159,8 @@ body {
 
 .diff-pair-remove {
   border: 0;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--ef-accent-soft);
+  color: var(--ef-accent-ink);
   width: 20px;
   height: 20px;
   border-radius: 6px;
@@ -1063,7 +1178,7 @@ body {
   gap: 10px;
   align-items: end;
   padding-top: 8px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--ef-card-border);
 }
 
 .diff-add-pair-row .field label {
@@ -1083,8 +1198,8 @@ body {
 }
 
 .diff-row-scope-box {
-  background: var(--ef-accent-softer);
-  border: 1px solid var(--ef-accent-border);
+  background: var(--ef-surface);
+  border: 1px solid var(--ef-card-border);
   border-radius: 12px;
   padding: 14px;
 }
@@ -1106,8 +1221,8 @@ body {
   flex-wrap: wrap;
   gap: 10px 20px;
   padding: 12px 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--ef-surface);
+  border: 1px solid var(--ef-card-border);
   border-radius: 10px;
 }
 
