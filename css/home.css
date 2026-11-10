@@ -349,13 +349,13 @@ body {
   font-weight: 500;
 }
 
-/* Lưới các nút chức năng (Layout vuông 2x2: 2 cái trên, 2 cái dưới) */
+/* Lưới các nút chức năng (4 nút nằm ngang) */
 .ef-button-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   width: 100%;
-  max-width: 520px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -364,10 +364,9 @@ body {
   appearance: none;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 22px 20px;
-  aspect-ratio: 1 / 1;
-  min-height: 200px;
+  border-radius: 16px;
+  padding: 22px 18px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -673,16 +672,7 @@ body {
 
 @media (max-width: 480px) {
   .ef-button-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .ef-btn-card {
-    min-height: 145px;
-    padding: 16px 14px;
-    border-radius: 15px;
-  }
-  .ef-card-name {
-    font-size: 14px;
+    grid-template-columns: 1fr;
   }
   .ef-home-theme-wrap {
     padding: 6px 8px 6px 12px;
