@@ -1,5 +1,5 @@
 /**
- * Puddin Excel Flow — Module Đối chiếu Dữ liệu giữa 2 File Excel
+ * Puddin Excel — Module Đối chiếu Dữ liệu giữa 2 File Excel
  * Hỗ trợ: chọn cột / chọn dòng / đối chiếu cả 2 file, đọc ngược sao kê,
  * nhận diện dòng khớp hoàn toàn, ô lệch dữ liệu, dòng thiếu và dòng dư.
  * Chỉ đối chiếu và hiển thị sự khác biệt (không xuất Excel).

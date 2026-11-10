@@ -1,5 +1,5 @@
 /**
- * Puddin Excel Flow — Trang chủ Tối giản & Đổi màu giao diện (Xanh lá / Đỏ)
+ * Puddin Excel — Trang chủ Tối giản & Đổi màu giao diện (Xanh lá / Đỏ)
  */
 (function() {
   'use strict';

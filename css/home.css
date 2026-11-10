@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Puddin Excel Flow — Trang chủ Tối giản & Hệ thống Đổi màu (Xanh lá / Đỏ)
+   Puddin Excel — Trang chủ Tối giản & Hệ thống Đổi màu (Xanh lá / Đỏ)
    ========================================================================== */
 
 :root,
@@ -604,10 +604,53 @@ body {
 .ef-preset-badge,
 .pdf2excel-doc-badge,
 .pdf2excel-loading,
-.merger-edit-toolbar {
+.merger-edit-toolbar,
+.pill:not(.warn),
+.ef-mini-badge.matched,
+.merger-type-tag.xlsx,
+.merger-result-badge.xlsx,
+.merger-cat-muavao,
+.merger-cat-baoco {
   background: var(--ef-accent-softer);
   color: var(--ef-accent-ink);
   border-color: var(--ef-accent-border);
+}
+
+.ef-detect-tag {
+  color: var(--ef-accent-ink) !important;
+  background: var(--ef-accent-softer) !important;
+  border: 1px solid var(--ef-accent-border) !important;
+}
+
+.ef-header-row-bar {
+  background: var(--ef-surface) !important;
+  border: 1px dashed var(--ef-accent-border) !important;
+}
+
+.ef-page-return:hover,
+.ef-page-return:focus-visible {
+  border-color: var(--ef-accent) !important;
+  background: var(--ef-accent-softer) !important;
+}
+
+.ef-files #targetDrop:has(.filename.ready) {
+  background: var(--ef-accent-softer) !important;
+  border-color: var(--ef-accent-border) !important;
+}
+
+.ef-files #targetDrop .filename.ready {
+  color: var(--ef-accent-ink) !important;
+}
+
+.ef-step.current {
+  background: var(--ef-accent-soft) !important;
+  color: var(--ef-accent-ink) !important;
+}
+
+.ef-step.complete .step-dot {
+  border-color: var(--ef-accent) !important;
+  color: var(--ef-accent-dark) !important;
+  background: var(--ef-accent-softer) !important;
 }
 
 .merger-edit-tip {
