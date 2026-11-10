@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="green">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ExcelFlow 4.4.4 • Popup Search CRUD</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/home.css">
+<title>Puddin Excel Flow</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<script>
+(function(){try{var t=localStorage.getItem('puddin_ef_theme');if(t==='red'||t==='green'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+<link rel="stylesheet" href="css/style.css?v=20261111">
+<link rel="stylesheet" href="css/home.css?v=20261111">
 </head>
 <body>
 <div class="ef-app">
 <header class="ef-header" id="efHeader" style="display:none">
   <div class="ef-header-container">
     <div class="ef-brand">
-      <span class="ef-logo"><b>X</b></span>
-      <button id="navHome" class="ef-brand-link nav active" type="button" title="Về trang chủ">ExcelFlow Suite</button>
+      <span class="ef-logo"><img src="assets/logo.png" alt="Puddin Excel Flow" class="ef-logo-img"></span>
+      <button id="navHome" class="ef-brand-link nav active" type="button" title="Về trang chủ">Puddin Excel Flow</button>
       <span class="ef-brand-sep"></span>
       <span class="ef-tagline">Trung tâm Công cụ Excel Thông minh</span>
     </div>
@@ -24,6 +28,10 @@
       <button id="navHistory" class="ef-nav-tab" type="button"><span class="ef-clock">◷</span> Lịch sử</button>
     </nav>
     <div class="ef-header-actions">
+      <div class="ef-theme-switch" role="group" aria-label="Đổi màu giao diện">
+        <button type="button" class="ef-theme-btn is-green active" data-theme-choice="green" title="Màu xanh lá"><span class="ef-theme-dot"></span>Xanh lá</button>
+        <button type="button" class="ef-theme-btn is-red" data-theme-choice="red" title="Màu đỏ"><span class="ef-theme-dot"></span>Đỏ</button>
+      </div>
       <div class="ef-header-badge"><span class="ef-pulse-dot"></span> Offline 100%</div>
       <button type="button" class="ef-outline" id="efSaveTemplate" style="display:none">▱ &nbsp; Lưu mẫu</button>
       <button class="btn teal primary-action" disabled="" id="exportBtn" style="display:none">⇩ Xuất file Excel mới</button>
@@ -35,9 +43,16 @@
 <section id="homePage" class="section active">
   <div class="ef-home-minimal">
     <div class="ef-brand-hero">
-      <div class="ef-brand-mark">X</div>
-      <h1 class="ef-brand-name">ExcelFlow</h1>
+      <div class="ef-brand-mark"><img src="assets/logo.png" alt="Puddin Excel Flow" class="ef-brand-mark-img"></div>
+      <h1 class="ef-brand-name">Puddin Excel Flow</h1>
       <p class="ef-brand-sub">Chọn chức năng để bắt đầu</p>
+      <div class="ef-home-theme-wrap">
+        <span class="ef-theme-label">Màu giao diện:</span>
+        <div class="ef-theme-switch" role="group" aria-label="Đổi màu giao diện">
+          <button type="button" class="ef-theme-btn is-green active" data-theme-choice="green" title="Màu xanh lá"><span class="ef-theme-dot"></span>Xanh lá</button>
+          <button type="button" class="ef-theme-btn is-red" data-theme-choice="red" title="Màu đỏ"><span class="ef-theme-dot"></span>Đỏ</button>
+        </div>
+      </div>
     </div>
 
     <div class="ef-button-grid">
@@ -64,7 +79,7 @@
 <section id="importPage" class="section">
 <div class="ef-page-breadcrumb">
   <button type="button" class="ef-back-home-btn" data-nav-home>← Quay lại Trang chủ Workspace</button>
-  <span class="ef-badge-active-tool">Công cụ đang mở: Ghép &amp; Đối chiếu Excel (ExcelFlow v4.4.4)</span>
+  <span class="ef-badge-active-tool">Công cụ đang mở: Ghép &amp; Đối chiếu Excel (Puddin Excel Flow)</span>
 </div>
 <div class="ef-steps" aria-label="Quy trình nhập liệu">
   <button type="button" data-go-step="1" class="ef-step" id="efStep1"><span class="step-dot" id="stepDot1">1</span><span>Nguồn</span></button>
@@ -474,7 +489,7 @@ E -&gt; money" spellcheck="false" style="min-height:83px"></textarea></div>
 <script src="js/preset-manager.js?v=20261109"></script>
 <script src="js/preview.js"></script>
 <script src="js/search-crud.js"></script>
-<script src="js/home.js"></script>
+<script src="js/home.js?v=20261111"></script>
 <script src="js/pdf2excel.js"></script>
 <script src="js/merger.js?v=20261109"></script>
 

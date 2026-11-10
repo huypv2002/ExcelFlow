@@ -1,10 +1,196 @@
 /* ==========================================================================
-   ExcelFlow Suite — Trang chủ Tối giản (Chỉ có các nút bấm chức năng)
+   Puddin Excel Flow — Trang chủ Tối giản & Hệ thống Đổi màu (Xanh lá / Đỏ)
    ========================================================================== */
+
+:root,
+html[data-theme="green"] {
+  --ef-page-bg: #f3fbf6;
+  --ef-accent: #16a34a;
+  --ef-accent-dark: #15803d;
+  --ef-accent-ink: #166534;
+  --ef-accent-soft: #dcfce7;
+  --ef-accent-softer: #f0fdf4;
+  --ef-accent-border: #86efac;
+  --ef-accent-border-strong: #4ade80;
+  --ef-accent-shadow: rgba(22, 163, 74, 0.16);
+  --ef-accent-shadow-strong: rgba(22, 163, 74, 0.24);
+  --ef-nav-bg: #eef7f1;
+  --ef-nav-hover: #dcfce7;
+  --teal: #16a34a;
+  --teal-dark: #15803d;
+  --teal-soft: #dcfce7;
+  --bg: #f3fbf6;
+}
+
+html[data-theme="red"] {
+  --ef-page-bg: #fef5f5;
+  --ef-accent: #dc2626;
+  --ef-accent-dark: #b91c1c;
+  --ef-accent-ink: #991b1b;
+  --ef-accent-soft: #fee2e2;
+  --ef-accent-softer: #fef2f2;
+  --ef-accent-border: #fca5a5;
+  --ef-accent-border-strong: #f87171;
+  --ef-accent-shadow: rgba(220, 38, 38, 0.16);
+  --ef-accent-shadow-strong: rgba(220, 38, 38, 0.24);
+  --ef-nav-bg: #fdf0f0;
+  --ef-nav-hover: #fee2e2;
+  --teal: #dc2626;
+  --teal-dark: #b91c1c;
+  --teal-soft: #fee2e2;
+  --bg: #fef5f5;
+}
+
+body {
+  background: var(--ef-page-bg) !important;
+  transition: background-color 0.25s ease;
+}
 
 /* Ẩn header mặc định khi ở trang chủ */
 .ef-header.is-hidden {
   display: none !important;
+}
+
+.ef-header {
+  border-bottom: 1px solid var(--ef-accent-border) !important;
+}
+
+.ef-brand {
+  gap: 10px !important;
+}
+
+.ef-brand .ef-logo {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+}
+
+.ef-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 5px rgba(15, 23, 42, 0.14));
+}
+
+.ef-brand .ef-brand-link {
+  width: auto !important;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 20px !important;
+}
+
+.ef-brand-link:hover {
+  color: var(--ef-accent-dark) !important;
+}
+
+.ef-header .ef-brand-sep,
+.ef-header .ef-tagline {
+  display: none;
+}
+
+/* Bộ chuyển màu Xanh lá / Đỏ */
+.ef-home-theme-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 6px 10px 6px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+.ef-theme-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.ef-theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 999px;
+}
+
+.ef-header-actions .ef-theme-switch {
+  margin-right: 2px;
+}
+
+.ef-theme-btn {
+  appearance: none;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #475569 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 5px 11px !important;
+  min-height: 28px !important;
+  border-radius: 999px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  box-shadow: none !important;
+}
+
+.ef-theme-btn:hover {
+  color: #0f172a !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.ef-theme-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ef-theme-btn.is-green .ef-theme-dot {
+  background: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.22);
+}
+
+.ef-theme-btn.is-red .ef-theme-dot {
+  background: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22);
+}
+
+.ef-theme-btn.is-green.active {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border-color: #15803d !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.28) !important;
+}
+
+.ef-theme-btn.is-green.active .ef-theme-dot {
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.ef-theme-btn.is-red.active {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.28) !important;
+}
+
+.ef-theme-btn.is-red.active .ef-theme-dot {
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
 /* Header Navigation Bar khi ở màn hình làm việc */
@@ -12,7 +198,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f0f4f9;
+  background: var(--ef-nav-bg);
   padding: 4px;
   border-radius: 12px;
   margin-left: 14px;
@@ -35,24 +221,24 @@
 }
 
 .ef-nav-tab:hover {
-  background: #e2ecf7;
+  background: var(--ef-nav-hover);
   color: #17243b;
 }
 
 .ef-nav-tab.active {
   background: #ffffff;
-  color: #0b816d;
+  color: var(--ef-accent-dark);
   font-weight: 750;
-  box-shadow: 0 2px 6px rgba(18, 155, 142, 0.12), 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px var(--ef-accent-shadow), 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .ef-header-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #e8f7f3;
-  color: #0a846f;
-  border: 1px solid #b7ecde;
+  background: var(--ef-accent-softer);
+  color: var(--ef-accent-ink);
+  border: 1px solid var(--ef-accent-border);
   padding: 5px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -63,10 +249,10 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--ef-accent);
 }
 
-/* Breadcrumb in ExcelFlow Sub-page */
+/* Breadcrumb in Sub-page */
 .ef-page-breadcrumb {
   display: flex;
   justify-content: space-between;
@@ -95,7 +281,7 @@
 }
 
 .ef-back-home-btn:hover {
-  background: #0d9488;
+  background: var(--ef-accent);
   color: #ffffff;
   transform: translateX(-2px);
 }
@@ -103,15 +289,15 @@
 .ef-badge-active-tool {
   font-size: 12.5px;
   font-weight: 650;
-  color: #047857;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  color: var(--ef-accent-ink);
+  background: var(--ef-accent-softer);
+  border: 1px solid var(--ef-accent-border);
   padding: 5px 12px;
   border-radius: 8px;
 }
 
 /* ==========================================================================
-   Trang chủ Tối giản: Căn giữa, ít chữ, không icon thừa
+   Trang chủ Tối giản: Căn giữa, logo hoa cúc/nút, nút chức năng
    ========================================================================== */
 .ef-home-minimal {
   min-height: 80vh;
@@ -130,17 +316,22 @@
 }
 
 .ef-brand-mark {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #0d9488, #0f766e);
-  color: #ffffff;
-  font-size: 28px;
-  font-weight: 900;
+  width: 82px;
+  height: 82px;
+  border-radius: 20px;
+  background: transparent;
   display: grid;
   place-items: center;
-  margin: 0 auto 16px;
-  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.25);
+  margin: 0 auto 14px;
+  box-shadow: none;
+}
+
+.ef-brand-mark-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.16));
 }
 
 .ef-brand-name {
@@ -196,16 +387,16 @@
   transform: translateY(-1px);
 }
 
-/* Nút Chức năng đang hoạt động (ExcelFlow) */
+/* Nút Chức năng đang hoạt động */
 .ef-btn-card.is-active {
-  border: 2px solid #0d9488;
-  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 60%);
-  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.12);
+  border: 2px solid var(--ef-accent);
+  background: linear-gradient(180deg, var(--ef-accent-softer) 0%, #ffffff 65%);
+  box-shadow: 0 6px 20px var(--ef-accent-shadow);
 }
 
 .ef-btn-card.is-active:hover {
-  border-color: #0f766e;
-  box-shadow: 0 12px 28px rgba(13, 148, 136, 0.22);
+  border-color: var(--ef-accent-dark);
+  box-shadow: 0 12px 28px var(--ef-accent-shadow-strong);
 }
 
 .ef-card-badge {
@@ -214,8 +405,8 @@
   font-weight: 750;
   padding: 3px 9px;
   border-radius: 6px;
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--ef-accent-soft);
+  color: var(--ef-accent-ink);
   letter-spacing: 0.2px;
 }
 
@@ -234,10 +425,230 @@
 }
 
 .ef-btn-card.is-active .ef-card-name {
-  color: #0d7a6e;
+  color: var(--ef-accent-dark);
+}
+
+/* ==========================================================================
+   Đồng bộ màu Xanh lá / Đỏ cho toàn bộ các trang công cụ
+   ========================================================================== */
+.ef-step.current {
+  background: var(--ef-accent-soft);
+  color: var(--ef-accent-ink);
+}
+
+.ef-step.current .step-dot {
+  background: var(--ef-accent);
+  border-color: var(--ef-accent);
+  color: #ffffff;
+}
+
+.ef-step.complete .step-dot {
+  border-color: var(--ef-accent);
+  color: var(--ef-accent-dark);
+  background: var(--ef-accent-softer);
+}
+
+.ef-step.complete + .step-line {
+  background: var(--ef-accent);
+}
+
+.ef-notice {
+  background: var(--ef-accent-softer);
+  color: var(--ef-accent-ink);
+  border: 1px solid var(--ef-accent-border);
+}
+
+.ef-i {
+  border-color: var(--ef-accent);
+  color: var(--ef-accent-dark);
+}
+
+.btn.teal,
+.ef-header-actions #exportBtn,
+.ef-addrow button,
+.btn.is-editing {
+  background: var(--ef-accent) !important;
+  border-color: var(--ef-accent) !important;
+  color: #ffffff !important;
+}
+
+.btn.teal:hover,
+.ef-header-actions #exportBtn:hover,
+.ef-addrow button:hover {
+  background: var(--ef-accent-dark) !important;
+  border-color: var(--ef-accent-dark) !important;
+}
+
+.btn.primary {
+  background: var(--ef-accent);
+  border-color: var(--ef-accent);
+  color: #ffffff;
+}
+
+.btn.primary:hover {
+  background: var(--ef-accent-dark);
+  border-color: var(--ef-accent-dark);
+}
+
+.switch input:checked + .switch-track {
+  background: var(--ef-accent);
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: 3px solid var(--ef-accent-border);
+}
+
+.ef-files .filebox:hover,
+.ef-files .filebox.is-dragging,
+.filebox.dropzone:hover,
+.filebox.dropzone.is-dragging,
+.merger-dropzone:hover,
+.merger-dropzone.is-dragging {
+  border-color: var(--ef-accent) !important;
+  background: var(--ef-accent-softer) !important;
+}
+
+.merger-drop-icon {
+  color: var(--ef-accent);
+}
+
+.ef-files .source-entry {
+  border-color: var(--ef-accent-border);
+  background: var(--ef-accent-softer);
+}
+
+.ef-files .source-number,
+.source-number {
+  background: var(--ef-accent);
+  color: #ffffff;
+}
+
+.ef-files #targetDrop:has(.filename.ready) {
+  background: var(--ef-accent-softer);
+  border-color: var(--ef-accent-border);
+}
+
+.ef-files #targetDrop .filename.ready,
+.dropzone .filename.ready {
+  color: var(--ef-accent-ink);
+}
+
+.ef-tab.active,
+.merger-tab-btn.active,
+.pdf2excel-tab.active {
+  background: var(--ef-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--ef-accent) !important;
+  box-shadow: 0 2px 8px var(--ef-accent-shadow);
+}
+
+.ef-tab.active {
+  background: var(--ef-accent-soft) !important;
+  color: var(--ef-accent-ink) !important;
+  box-shadow: none;
+}
+
+.ef-preview-state {
+  border-color: var(--ef-accent-border);
+  color: var(--ef-accent-ink);
+  background: var(--ef-accent-softer);
+}
+
+.ef-result #importStatus {
+  background: var(--ef-accent-softer);
+  color: var(--ef-accent-ink);
+}
+
+.ef-metric:first-child strong,
+.ef-metric #showSkipped,
+.ef-pair-pill b,
+.merger-pdf-info-box h4 {
+  color: var(--ef-accent-dark);
+}
+
+.ef-page-controls span {
+  border-color: var(--ef-accent-border);
+  background: var(--ef-accent-softer);
+  color: var(--ef-accent-ink);
+}
+
+.ef-preview-action #previewBtn {
+  background: var(--ef-accent-softer);
+  color: var(--ef-accent-ink);
+  border-color: var(--ef-accent-border);
+}
+
+.ef-preview-action #previewBtn:hover {
+  background: var(--ef-accent-soft);
+}
+
+.ef-preset-badge,
+.pdf2excel-doc-badge,
+.pdf2excel-loading,
+.merger-edit-toolbar {
+  background: var(--ef-accent-softer);
+  color: var(--ef-accent-ink);
+  border-color: var(--ef-accent-border);
+}
+
+.merger-edit-tip {
+  color: var(--ef-accent-ink);
+}
+
+.pdf2excel-spinner {
+  border-color: var(--ef-accent-soft);
+  border-top-color: var(--ef-accent);
+}
+
+.ef-approval-yes {
+  background: var(--ef-accent) !important;
+  border-color: var(--ef-accent) !important;
+}
+
+.ef-addrow select:focus,
+.ef-sheets .field select:focus,
+.ef-template-controls select:focus,
+.field select:focus,
+.merger-search-box input:focus {
+  border-color: var(--ef-accent) !important;
+  box-shadow: 0 0 0 2px var(--ef-accent-shadow) !important;
+}
+
+.data-table td[contenteditable="true"]:hover {
+  background: var(--ef-accent-softer);
+  box-shadow: inset 0 0 0 1px var(--ef-accent);
+}
+
+.data-table td[contenteditable="true"]:focus {
+  box-shadow: inset 0 0 0 2px var(--ef-accent) !important;
+}
+
+.data-table tr.is-selected td {
+  background: var(--ef-accent-soft) !important;
+}
+
+.ef-app input:focus-visible,
+.ef-app button:focus-visible,
+.ef-app select:focus-visible,
+.ef-app textarea:focus-visible {
+  outline: 2px solid var(--ef-accent-border-strong);
+  outline-offset: 2px;
 }
 
 /* Responsive */
+@media (max-width: 1120px) {
+  .ef-header-container {
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+  .ef-main-nav {
+    margin-left: 0;
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
 @media (max-width: 860px) {
   .ef-button-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -248,8 +659,23 @@
   }
 }
 
+@media (max-width: 600px) {
+  .ef-brand .ef-brand-link {
+    flex-shrink: 1;
+    white-space: normal;
+  }
+  .ef-header-actions .ef-theme-switch {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
 @media (max-width: 480px) {
   .ef-button-grid {
     grid-template-columns: 1fr;
+  }
+  .ef-home-theme-wrap {
+    padding: 6px 8px 6px 12px;
+    gap: 8px;
   }
 }
