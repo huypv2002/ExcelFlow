@@ -1568,7 +1568,6 @@
    el('navCompare')?.classList.toggle('active',compare);
    el('navHistory')?.classList.toggle('active',history);
 
-   if(el('efSaveTemplate')) el('efSaveTemplate').style.display = isImport ? '' : 'none';
    if(el('exportBtn')) el('exportBtn').style.display = isImport ? '' : 'none';
 
    if(history)showHistories();

@@ -394,7 +394,7 @@
           </div>
 
           <div class="ef-modal-footer">
-            <span>Dữ liệu được lưu an toàn tại trình duyệt của bạn (Offline 100%).</span>
+            <span>Dữ liệu được lưu an toàn tại trình duyệt của bạn.</span>
             <strong>ExcelFlow Presets</strong>
           </div>
         </div>`;
